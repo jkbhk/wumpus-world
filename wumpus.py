@@ -83,34 +83,29 @@ def move():
     
     facing = directions[orientation]
 
-
     if facing == "north":
         if currentCell - GRID_X > -1:
             currentCell -= GRID_X
         else:
             print("bump")
-            gameOver = True
 
     if facing == "south":
         if currentCell + GRID_X < (GRID_X * GRID_Y):
             currentCell += GRID_X
         else:
             print("bump")
-            gameOver = True
 
     if facing == "east":
         if (currentCell) % GRID_X is not GRID_X-1:
             currentCell += 1
         else:
             print("bump")
-            gameOver = True
 
     if facing == "west":
         if (currentCell) % GRID_X is not 0:
             currentCell -= 1
         else:
             print("bump")
-            gameOver = True
 
 
     cells[prevCell][4] = "?"
@@ -141,10 +136,23 @@ def handleInput(input):
         move()
 
     
+def initializeCellData():
+    for i in range(len(cells)):
+        cells[i][0] = "."
+        cells[i][1] = "."
+        cells[i][2] = "."
+        cells[i][3] = " "
+        cells[i][4] = "?"
+        cells[i][5] = " "
+        cells[i][6] = "."
+        cells[i][7] = "."
+        cells[i][8] = "."
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #test2()
+    initializeCellData()
     cells[41][4] = 'W'
     cells[35][4] = '^'
 
