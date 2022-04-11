@@ -1,4 +1,8 @@
-
+from pyswip import Prolog
+import random
+prolog = Prolog()
+prolog.consult("knowledge.pl")
+print(list(prolog.query("check_equal(2,2)")))
 
 GRID_X = 7
 GRID_Y = 6
@@ -6,10 +10,7 @@ CONTENT_SIZE = 3
 
 directions = ["north","east","south","west"]
 orientation = 0
-pos_x = 0
-pos_y = 0
 currentCell = 35
-
 gameOver = False
 
 cells = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(GRID_X * GRID_Y)]
@@ -149,12 +150,38 @@ def initializeCellData():
         cells[i][8] = "."
 
 
-# Press the green button in the gutter to run the script.
+
+def spawnWumpus():
+    x = random.randint(0,(GRID_X*GRID_Y )-1)
+    cells[x][4] = 'W'
+
+    if(x+1 >= 0 and x+1 < GRID_X*GRID_Y):
+        cells[x+1][1] = '='
+
+    if(x-1 >= 0 and x-1 < GRID_X*GRID_Y):
+        cells[x-1][1] = '='
+
+    if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y):
+        cells[x+GRID_X][1] = '='
+
+    if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y):    
+        cells[x-GRID_X][1] = '='
+
+def spawnAgent():
+    global currentCell
+
+    x = random.randint(0,(GRID_X*GRID_Y )-1)
+    if cells[x][4] != '?':
+        spawnAgent()
+    else:
+        cells[x][4] = '^'
+        currentCell = x
+
 if __name__ == '__main__':
     #test2()
     initializeCellData()
-    cells[41][4] = 'W'
-    cells[35][4] = '^'
+    spawnWumpus()
+    spawnAgent()
 
     while gameOver is False:
         displayGridDynamic()
