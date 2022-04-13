@@ -5,9 +5,21 @@ import random
 # prolog.consult("knowledge.pl")
 # print(list(prolog.query("check_equal(2,2)")))
 
+# coordinate translation
+# examples
+# 1 c,1 r = 29
+# 0 c,1 r = 28
+# 0 c,0 r = 35
+# 6 c,0 r = 41
+# 0 c,5 r = 0
+
+# (grid_x * grid_y) - (grix_x + (r x grid_x)) + c = index
+
 GRID_X = 7
 GRID_Y = 6
 CONTENT_SIZE = 3
+
+relativeSize = 3
 
 directions = ["north","east","south","west"]
 orientation = 0
@@ -55,7 +67,7 @@ def displayGridDynamic():
 
         for size in range(CONTENT_SIZE):
             for x in range(GRID_X):
-                grid += (("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE]) + ("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 1]) + ("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 2]) + "  ")
+                grid += (("{} ").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE]) + ("{} ").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 1]) + ("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 2]) + "   ")
             grid += "\n"
 
         grid += "\n" 
@@ -66,6 +78,19 @@ def displayGridDynamic():
         #grid += "\n"
 
     print(grid)
+
+def displayRelativeGrid():
+    for i in range(relativeSize):
+        for j in range(relativeSize):
+            print("{} {} {}   ".format('.','.','.'), end="")
+        print("\n",end="")
+        for j in range(relativeSize):
+            print("{} {} {}   ".format(' ', '?', ' '), end="")
+        print("\n",end="")
+        for j in range(relativeSize):
+            print("{} {} {}   ".format('.', '.', '.'), end="")
+        print("\n")
+
 
 
 def getPointer(o):
@@ -111,8 +136,16 @@ def move():
             print("bump")
 
 
-    cells[prevCell][4] = "?"
-    cells[currentCell][4] = getPointer(directions[orientation])
+    if cells[currentCell][0] == "#":
+        currentCell = prevCell
+        print("wall")
+        sendWallBump()
+    else:
+        cells[prevCell][4] = "?"
+        cells[currentCell][4] = getPointer(directions[orientation])
+
+def sendWallBump():
+    print("sensed a bump")
 
 
 def turn(x):
@@ -152,9 +185,18 @@ def initializeCellData():
         cells[i][8] = "."
 
 
+def spawnCoin():
+    x = random.randint(0,(GRID_X*GRID_Y )-1)
+    if cells[x][6] != '.':
+        return spawnCoin()
+    cells[x][6] = '*'
+
 
 def spawnWumpus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
+    if cells[x][4] != '?':
+        return spawnWumpus()
+
     cells[x][4] = 'W'
 
     if(x+1 >= 0 and x+1 < GRID_X*GRID_Y):
@@ -179,15 +221,35 @@ def spawnAgent():
         cells[x][4] = '^'
         currentCell = x
 
+def setWalls():
+    for n in range(0,GRID_X):
+        for i in range(len(cells[n])):
+            cells[n][i] = '#'
+
+    for s in range((GRID_X * GRID_Y) - GRID_X,GRID_X * GRID_Y):
+        for i in range(len(cells[s])):
+            cells[s][i] = '#'
+
+    for e in range((GRID_X - 1),GRID_X*GRID_Y,GRID_X):
+        for i in range(len(cells[e])):
+            cells[e][i] = '#'
+
+    for w in range(0,((GRID_Y * GRID_X )- GRID_X),GRID_X):
+        for i in range(len(cells[w])):
+            cells[w][i] = '#'
+
 if __name__ == '__main__':
     #test2()
     initializeCellData()
-    #spawnWumpus()
-    #spawnAgent()
+    setWalls()
+    spawnWumpus()
+    spawnCoin()
+    spawnAgent()
 
     while gameOver is False:
         displayGridDynamic()
-        temp = input("enter input: ")
+        displayRelativeGrid()
+        temp = input("\nenter input: ")
         handleInput(temp)
 
 
