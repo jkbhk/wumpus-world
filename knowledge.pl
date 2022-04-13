@@ -53,10 +53,29 @@ check_equal(A,B) :-
 
 
 reborn :-
-	write('What is your name?'),
-	read(X),
-	write('Hi '),
-	write(X).
+	retractall(visited(_,_)),retractall(wumpus(_,_)),
+	retractall(confundus(_,_)),retractall(tingle(_,_)),
+	retractall(glitter(_,_)),retractall(stench(_,_)),
+	retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(move(_,_)),retractall(reposition(_)),
+	retractall(current(_,_,_)),retractall(explore(_)),
+	retractall(hasarrow),assertz(current(0,0,rnorth)).
+        %relative positive (0,0), relative orientation is north
+
+/* reposition:
+The Agent is randomly relocated to a safe location in the Wumpus World.
+The relative position is reset to (0,0) and relative orientation is
+reset to become the Relative North. All memory of previous steps and
+sensory readings is lost, except the fact of existence of uncollected
+coins, whether the Wumpus is alive and whether the Agent has the
+arrow.*/
+reposition([on,_,_,_,_,_]) :-
+	retractall(visited(_,_)),retractall(wumpus(_,_)),
+	retractall(confundus(_,_)),retractall(tingle(_,_)),
+	retractall(glitter(_,_)),retractall(stench(_,_)),
+	retractall(safe(_,_)),retractall(wall(_,_)),
+	assertz(current(0,0,rnorth)).
+        % reset relative positive (0,0), relative orientation is north
 
 
 % visited: if in databse, return true, else return false (for every
@@ -66,6 +85,10 @@ reborn :-
 % glitter: if i move and got glitter, pick up coin
 % wall: if i move and hit a wall, receive a bump
 
+%
+% Confounded - Stench - Tingle - Glitter - Bump - Scream
+%
+
 move(moveforward,bump).
 move(moveforward,stench).
 move(moveforward,glitter).
@@ -73,7 +96,11 @@ move(pickup,_).
 move(moveforward,tingle).
 move(moveforward,_).
 
-
+/* Agent step on cell inhabited by wumpus:
+Relative position reset occurs, as with the case of stepping into a
+Confundus Portal, to prepare for a new game. All memory of previous
+steps and sensory reading is lost without exceptions, the arrow is
+returned to the Agent. */
 
 wall(X,Y) :-
 	move(moveforward,bump)->
