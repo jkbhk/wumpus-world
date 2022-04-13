@@ -19,6 +19,8 @@ GRID_X = 7
 GRID_Y = 6
 CONTENT_SIZE = 3
 
+relativeSize = 3
+
 directions = ["north","east","south","west"]
 orientation = 0
 currentCell = 35
@@ -76,6 +78,19 @@ def displayGridDynamic():
         #grid += "\n"
 
     print(grid)
+
+def displayRelativeGrid():
+    for i in range(relativeSize):
+        for j in range(relativeSize):
+            print("{} {} {}   ".format('.','.','.'), end="")
+        print("\n",end="")
+        for j in range(relativeSize):
+            print("{} {} {}   ".format(' ', '?', ' '), end="")
+        print("\n",end="")
+        for j in range(relativeSize):
+            print("{} {} {}   ".format('.', '.', '.'), end="")
+        print("\n")
+
 
 
 def getPointer(o):
@@ -233,7 +248,8 @@ if __name__ == '__main__':
 
     while gameOver is False:
         displayGridDynamic()
-        temp = input("enter input: ")
+        displayRelativeGrid()
+        temp = input("\nenter input: ")
         handleInput(temp)
 
 
