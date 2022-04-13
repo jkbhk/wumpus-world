@@ -1,8 +1,10 @@
-from pyswip import Prolog
 import random
-prolog = Prolog()
-prolog.consult("knowledge.pl")
-print(list(prolog.query("check_equal(2,2)")))
+
+# from pyswip import Prolog
+
+# prolog = Prolog()
+# prolog.consult("knowledge.pl")
+# print(list(prolog.query("check_equal(2,2)")))
 
 GRID_X = 7
 GRID_Y = 6

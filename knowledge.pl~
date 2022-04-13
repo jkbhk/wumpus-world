@@ -15,19 +15,6 @@ check_equal(A,B) :-
 	A < B ->
 	write("A lesser than B") ,! .
 
-:- abolish(visited/2).
-:- abolish(wumpus/2).
-:- abolish(confundus/2).
-:- abolish(tingle/2).
-:- abolish(glitter/2).
-:- abolish(stench/2).
-:- abolish(safe/2).
-:- abolish(wall/2).
-:- abolish(move/2).
-:- abolish(reposition/1).
-:- abolish(current/3).
-:- abolish(explore/1).
-
 :- dynamic([
        visited/2,
        wumpus/2,
@@ -45,11 +32,9 @@ check_equal(A,B) :-
        explore/1
 ]).
 
-
-% hasarrow :-
-%	\+move(shoot,_),
-%	write('Agent still has arrow').
-
+hasarrow :-
+	\+move(shoot,_),
+	write('Agent still has arrow').
 
 
 
