@@ -1,7 +1,7 @@
 say_hi :-
-	write("What is your name?"),
+	write('What is your name?'),
 	read(X),
-	write("Hi "),
+	write('Hi '),
 	write(X).
 
 check_equal(A,B) :-
@@ -15,7 +15,7 @@ check_equal(A,B) :-
 	A < B ->
 	write("A lesser than B") ,! .
 
-:- abolish(visited/2).
+/*:- abolish(visited/2).
 :- abolish(wumpus/2).
 :- abolish(confundus/2).
 :- abolish(tingle/2).
@@ -26,7 +26,7 @@ check_equal(A,B) :-
 :- abolish(move/2).
 :- abolish(reposition/1).
 :- abolish(current/3).
-:- abolish(explore/1).
+:- abolish(explore/1). */
 
 :- dynamic([
        visited/2,
@@ -38,17 +38,39 @@ check_equal(A,B) :-
        safe/2,
        wall/2,
        move/2,
-       reborn/0,
        reposition/1,
-       hasarrow/0,
        current/3,
-       explore/1
+       explore/1,
+       reborn/0,
+       hasarrow/0
 ]).
 
 
-% hasarrow :-
-%	\+move(shoot,_),
-%	write('Agent still has arrow').
+/* hasarrow :-
+	\+move(shoot,_),
+	write('Agent still has arrow').
+*/
+
+
+reborn :-
+	write('What is your name?'),
+	read(X),
+	write('Hi '),
+	write(X).
+
+
+% visited: if in databse, return true, else return false (for every
+% move, add visited to the database.
+% wumpus: if got stench, set the
+% squares (X,Y+1),(X,Y-1),(X+1,Y),(X-1,Y) as true same as tingle,
+% glitter: if i move and got glitter, pick up coin
+% wall: if i move and hit a wall, receive a bump
+
+move(moveforward,bump).
+
+wall(X,Y) :-
+	move(moveforward,bump),
+	assertz(wall(X,Y)).
 
 
 

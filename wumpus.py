@@ -1,7 +1,6 @@
+
 import random
-
 # from pyswip import Prolog
-
 # prolog = Prolog()
 # prolog.consult("knowledge.pl")
 # print(list(prolog.query("check_equal(2,2)")))
@@ -56,14 +55,15 @@ def displayGridDynamic():
 
         for size in range(CONTENT_SIZE):
             for x in range(GRID_X):
-                grid += ((" {} ").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE]) + (" {} ").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 1]) + (" {} ").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 2]) + "|")
+                grid += (("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE]) + ("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 1]) + ("{}").format(cells[y*GRID_Y + x + y][size * CONTENT_SIZE + 2]) + "  ")
             grid += "\n"
 
-        for k in range(GRID_X):
-            for times in range(CONTENT_SIZE):
-                grid += "---"
-            grid += "+"
-        grid += "\n"
+        grid += "\n" 
+        #for k in range(GRID_X):
+        #    for times in range(CONTENT_SIZE):
+        #        grid += "---"
+        #    grid += "+"
+        #grid += "\n"
 
     print(grid)
 
@@ -182,8 +182,8 @@ def spawnAgent():
 if __name__ == '__main__':
     #test2()
     initializeCellData()
-    spawnWumpus()
-    spawnAgent()
+    #spawnWumpus()
+    #spawnAgent()
 
     while gameOver is False:
         displayGridDynamic()
