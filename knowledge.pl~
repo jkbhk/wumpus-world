@@ -115,8 +115,7 @@ visited(X,Y) :-
 
 safe(X,Y) :-
 	\+wumpus(X,Y),
-	\+confundus(X,Y),
-	assertz(safe(X,Y)).
+	\+confundus(X,Y).
 
 
 
