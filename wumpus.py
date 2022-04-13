@@ -5,6 +5,16 @@ prolog = Prolog()
 prolog.consult("knowledge.pl")
 print(list(prolog.query("check_equal(2,2)")))
 
+# coordinate translation
+# examples
+# 1 c,1 r = 29
+# 0 c,1 r = 28
+# 0 c,0 r = 35
+# 6 c,0 r = 41
+# 0 c,5 r = 0
+
+# (grid_x * grid_y) - (grix_x + (r x grid_x)) + c = index
+
 GRID_X = 7
 GRID_Y = 6
 CONTENT_SIZE = 3
@@ -114,9 +124,13 @@ def move():
     if cells[currentCell][0] == "#":
         currentCell = prevCell
         print("wall")
+        sendWallBump()
     else:
         cells[prevCell][4] = "?"
         cells[currentCell][4] = getPointer(directions[orientation])
+
+def sendWallBump():
+    print("sensed a bump")
 
 
 def turn(x):
@@ -156,10 +170,16 @@ def initializeCellData():
         cells[i][8] = "."
 
 
+def spawnCoin():
+    x = random.randint(0,(GRID_X*GRID_Y )-1)
+    if cells[x][6] != '.':
+        return spawnCoin()
+    cells[x][6] = '*'
+
 
 def spawnWumpus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][4] == '#':
+    if cells[x][4] != '?':
         return spawnWumpus()
 
     cells[x][4] = 'W'
@@ -208,6 +228,7 @@ if __name__ == '__main__':
     initializeCellData()
     setWalls()
     spawnWumpus()
+    spawnCoin()
     spawnAgent()
 
     while gameOver is False:
