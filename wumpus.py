@@ -105,6 +105,7 @@ def getPointer(o):
 
 def move():
 
+    global relativeSize
     global currentCell
     global gameOver
     prevCell = currentCell
@@ -143,6 +144,8 @@ def move():
     else:
         cells[prevCell][4] = "?"
         cells[currentCell][4] = getPointer(directions[orientation])
+
+    
 
 def sendWallBump():
     print("sensed a bump")
