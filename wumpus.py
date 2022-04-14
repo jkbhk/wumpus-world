@@ -1,8 +1,8 @@
 
 import random
-# from pyswip import Prolog
-# prolog = Prolog()
-# prolog.consult("knowledge.pl")
+from pyswip import Prolog
+prolog = Prolog()
+prolog.consult("test.pl")
 # print(list(prolog.query("check_equal(2,2)")))
 
 # coordinate translation
@@ -14,6 +14,15 @@ import random
 # 0 c,5 r = 0
 
 # (grid_x * grid_y) - (grix_x + (r x grid_x)) + c = index
+
+# relative coordinate translation
+# examples
+# 3x3, 4
+# 5x5, 12
+# 7x7, 24
+# 9x9, 40
+# center = (x**2 - 1 ) / 2
+
 
 GRID_X = 7
 GRID_Y = 6
@@ -80,16 +89,57 @@ def displayGridDynamic():
     print(grid)
 
 def displayRelativeGrid():
-    for i in range(relativeSize):
-        for j in range(relativeSize):
-            print("{} {} {}   ".format('.','.','.'), end="")
-        print("\n",end="")
-        for j in range(relativeSize):
-            print("{} {} {}   ".format(' ', '?', ' '), end="")
-        print("\n",end="")
-        for j in range(relativeSize):
-            print("{} {} {}   ".format('.', '.', '.'), end="")
-        print("\n")
+
+    global relativeSize
+
+    visited = list(prolog.query("visited(X,Y)"))
+    for coord in visited:
+        print(coord.get('X'), " .  ", coord.get('Y'))
+        x = coord.get('X')
+        y = coord.get('Y')
+        if abs(x) > (relativeSize-1)/2 or abs(y) > (relativeSize-1)/2:
+            relativeSize+=2
+            return displayRelativeGrid()
+        
+    grid = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(relativeSize * relativeSize)]
+    origin = (relativeSize*relativeSize - 1) / 2
+
+    for coord in visited:
+        x = coord.get('X')
+        y = coord.get('Y')
+        target = int(origin) + x + (y * relativeSize)
+        # query prolog later
+        grid[target][0] = '1'
+        grid[target][1] = '2'
+        grid[target][2] = '3'
+        grid[target][3] = '4'
+        grid[target][4] = '5'
+        grid[target][5] = '6'
+        grid[target][6] = '7'
+        grid[target][7] = '8'
+        grid[target][8] = '9'
+
+    rgrid = ""
+
+    for y in range(relativeSize):
+        for size in range(CONTENT_SIZE):
+            for x in range(relativeSize):
+                rgrid += (("{} ").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE]) + ("{} ").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE + 1]) + ("{}").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE + 2]) + "   ")
+            rgrid += "\n"
+        rgrid += "\n" 
+        
+    print(rgrid)
+
+    # for i in range(relativeSize):
+    #     for j in range(relativeSize):
+    #         print("{} {} {}   ".format('.','.','.'), end="")
+    #     print("\n",end="")
+    #     for j in range(relativeSize):
+    #         print("{} {} {}   ".format(' ', '?', ' '), end="")
+    #     print("\n",end="")
+    #     for j in range(relativeSize):
+    #         print("{} {} {}   ".format('.', '.', '.'), end="")
+    #     print("\n")
 
 
 
@@ -144,6 +194,8 @@ def move():
     else:
         cells[prevCell][4] = "?"
         cells[currentCell][4] = getPointer(directions[orientation])
+        prolog.assertz("visited(0,1)")
+        
 
     
 
@@ -173,6 +225,10 @@ def handleInput(input):
         
     if input == "move":
         move()
+
+    if input == "test":
+        #print(bool(list(prolog.query("visited(0,1)"))))
+        print(list(prolog.query("visited(X,Y)")))
 
     
 def initializeCellData():
