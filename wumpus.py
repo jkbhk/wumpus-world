@@ -1,5 +1,6 @@
 
 import random
+from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
 prolog.consult("test.pl")
@@ -181,6 +182,7 @@ def move():
     global currentCell
     global gameOver
     prevCell = currentCell
+    prevNPC = cells[currentCell][4]
     
     facing = directions[orientation]
 
@@ -214,7 +216,7 @@ def move():
         print("wall")
         sendWallBump()
     else:
-        cells[prevCell][4] = "?"
+        cells[prevCell][4] = prevNPC
         cells[currentCell][4] = getPointer(directions[orientation])
         prolog.assertz("visited(0,1)")
         
@@ -268,10 +270,28 @@ def initializeCellData():
 
 def spawnCoin():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][6] != '.':
+    if cells[x][6] != '.' or cells[x][4] == 'W' or cells[x][4] == 'O':
         return spawnCoin()
     cells[x][6] = '*'
 
+def spawnConfundus():
+    x = random.randint(0,(GRID_X*GRID_Y )-1)
+    if cells[x][4] != '?':
+        return spawnConfundus()
+
+    cells[x][4] = 'O'
+
+    if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != "#"):
+        cells[x+1][1] = 'T'
+
+    if(x-1 >= 0 and x-1 < GRID_X*GRID_Y and cells[x-1][1] != "#"):
+        cells[x-1][1] = 'T'
+
+    if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y and cells[x+GRID_X][1] != "#"):
+        cells[x+GRID_X][1] = 'T'
+
+    if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y) and cells[x-GRID_X][1] != "#":    
+        cells[x-GRID_X][1] = 'T'
 
 def spawnWumpus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
@@ -280,16 +300,16 @@ def spawnWumpus():
 
     cells[x][4] = 'W'
 
-    if(x+1 >= 0 and x+1 < GRID_X*GRID_Y):
+    if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != '#'):
         cells[x+1][1] = '='
 
-    if(x-1 >= 0 and x-1 < GRID_X*GRID_Y):
+    if(x-1 >= 0 and x-1 < GRID_X*GRID_Y and cells[x-1][1] != '#'):
         cells[x-1][1] = '='
 
-    if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y):
+    if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y and cells[x+GRID_X][1] != '#'):
         cells[x+GRID_X][1] = '='
 
-    if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y):    
+    if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y and cells[x-GRID_X][1] != '#'):    
         cells[x-GRID_X][1] = '='
 
 def spawnAgent():
@@ -323,6 +343,8 @@ if __name__ == '__main__':
     #test2()
     initializeCellData()
     setWalls()
+    for i in range(3):
+        spawnConfundus()
     spawnWumpus()
     spawnCoin()
     spawnAgent()
