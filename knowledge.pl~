@@ -55,7 +55,7 @@ check_equal(A,B) :-
 
 reborn :-
 	%retractall(visited(_,_)),
-	retractall(wumpus(_,_)), retractall(dead(_)),
+	retractall(wumpus(_,_)),
 	retractall(confundus(_,_)),%retractall(tingle(_,_)),
 	%retractall(glitter(_,_)),retractall(stench(_,_)),
 	%retractall(safe(_,_)),retractall(wall(_,_)),
@@ -160,6 +160,7 @@ move(A,[off,_,_,_,off,_]) :-
 	assertz(current(NewX,Y,D)) ,
 	visited(NewX,Y), !.
 
+
 %When agent step into portal, do reposition
 move(A,[Confounded,_,_,_,_,_]) :-
 	A == moveforward,
@@ -195,13 +196,9 @@ move(A,[_,_,_,_,Bump,_]) :-
 move(A,[_,_,_,_,_,Scream]) :-
 	A == shoot,
 	Scream == on,
-	dead(wumpus),
-	write('wumpus is dead!'),
-        assertz(dead(wumpus));
-
-	Scream == off,
-	write('wumpus is still alive').
-
+	assertz(dead(wumpus)),
+	write('Wumpus is dead');
+	write('Wumpus still alive').
 
 
 
