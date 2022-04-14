@@ -89,12 +89,39 @@ reposition([on,_,_,_,_,_]) :-
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
 %
 
-move(moveforward,bump).
-move(moveforward,stench).
-move(moveforward,glitter).
-move(pickup,_).
-move(moveforward,tingle).
-move(moveforward,_).
+
+%When agent senses stench, set possible wumpus positions
+move(A,[_,Stench,_,_,_,_]) :-
+	A == moveforward,
+	Stench == on.
+
+
+%When agent senses glitter, pickup coin
+move(A,[_,_,_,Glitter,_,_]) :-
+	A == moveforward,
+	Glitter == on.
+
+move(pickup,[_,_,_,_,_,_]).
+
+
+%When agent senses tingle, set possible confundus portal positions
+move(A,[_,_,Tingle,_,_,_]) :-
+	A == moveforward,
+	Tingle == on.
+
+
+%When agent step into portal, do reposition
+move(A,[Confounded,_,_,_,_,_]) :-
+	A == moveforward,
+	Confounded == on,
+	reposition([on,_,_,_,_,_]).
+
+
+%When agent move forward and collides with a wall
+move(A,[_,_,_,_,Bump,_]) :-
+	A == moveforward,
+	Bump == on.
+
 
 /* Agent step on cell inhabited by wumpus:
 Relative position reset occurs, as with the case of stepping into a
@@ -103,17 +130,19 @@ steps and sensory reading is lost without exceptions, the arrow is
 returned to the Agent. */
 
 wall(X,Y) :-
-	move(moveforward,bump)->
+	move(moveforward,[_,_,_,_,on,_])->
 	assertz(wall(X,Y)).
 
 glitter(X,Y) :-
-	move(moveforward,glitter)->
+	visited(X,Y),
+	move(moveforward,[_,_,_,on,_,_])->
 	assertz(glitter(X,Y)), %initially there was glitter
-	move(pickup,_),
+	move(pickup,[_,_,_,_,_,_]),
 	retract(glitter(X,Y)). %once u pick the coin, glitter is gone
 
 stench(X,Y) :-
-	move(moveforward,stench)->
+	visited(X,Y),
+	move(moveforward,[_,on,_,_,_,_])->
 	assertz(stench(X,Y)),
 	N is Y + 1, %top
 	S is Y - 1, %bottom
@@ -125,7 +154,8 @@ stench(X,Y) :-
 	assertz(wumpus(X,S)). %bottom
 
 tingle(X,Y) :-
-	move(moveforward,tingle)->
+	visited(X,Y),
+	move(moveforward,[_,_,on,_,_,_])->
 	assertz(tingle(X,Y)),
 	N is Y + 1, %top
 	S is Y - 1, %bottom
@@ -136,8 +166,8 @@ tingle(X,Y) :-
 	assertz(confundus(X,N)), %top
 	assertz(confundus(X,S)). %bottom
 
+
 visited(X,Y) :-
-	move(moveforward,_) ->
 	assertz(visited(X,Y)).
 
 safe(X,Y) :-
