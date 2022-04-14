@@ -35,6 +35,8 @@ orientation = 0
 currentCell = 35
 gameOver = False
 
+currentSenses = ["on","off","off","off","off","off"]
+
 cells = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(GRID_X * GRID_Y)]
 
 for elem in cells[0]:
@@ -105,43 +107,63 @@ def displayRelativeGrid():
     origin = (relativeSize*relativeSize - 1) / 2
 
     for coord in visited:
+        print("sdfsaf")
         x = coord.get('X')
         y = coord.get('Y')
-        target = int(origin) + x + (y * relativeSize)
-        # query prolog later
-        grid[target][0] = '1'
-        grid[target][1] = '2'
-        grid[target][2] = '3'
-        grid[target][3] = '4'
-        grid[target][4] = '5'
-        grid[target][5] = '6'
-        grid[target][6] = '7'
-        grid[target][7] = '8'
-        grid[target][8] = '9'
+        target = int(origin) + x - (y * relativeSize)
+
+        # querying kb for each symbol
+        grid[target][0] = "%" if bool(list(prolog.query("confundus({},{})".format(x,y)))) else "."
+        grid[target][1] = '=' if bool(list(prolog.query("stench({},{})".format(x,y)))) else "."
+        grid[target][2] = "T" if bool(list(prolog.query("tingle({},{})".format(x,y)))) else "."
+        grid[target][3] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
+
+        temp = " "
+        if bool(list(prolog.query("wumpus({},{})".format(x,y)))) and bool(list(prolog.query("confundus({},{})".format(x,y)))):
+            temp = "U"
+        elif bool(list(prolog.query("wumpus({},{})".format(x,y)))):
+            temp = "W"
+        elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
+            temp = "O"
+        elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
+            direction = list(prolog.query("current({},{},D)".format(x,y)))[0]
+            if direction == "(r)north":
+                direction = "^"
+            elif direction == "(r)south":
+                direction = "v"
+            elif direction == "(r)east":
+                direction = ">"
+            elif direction == "(r)west":
+                direction = "<"
+
+            temp = direction
+        elif bool(list(prolog.query("safe({},{})".format(x,y)))) and not bool(list(prolog.query("visited({},{})".format(x,y)))):
+            temp = "s"
+        elif bool(list(prolog.query("safe({},{})".format(x,y)))) and bool(list(prolog.query("visited({},{})".format(x,y)))):
+            temp = "S"
+        else:
+            temp = "?"
+
+        grid[target][4] = temp
+        grid[target][5] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
+        grid[target][6] = '*' if bool(list(prolog.query("glitter({},{})".format(x,y)))) else "."
+        grid[target][7] = 'B' if currentSenses[4] == "on" else "."
+        grid[target][8] = '@' if currentSenses[5] == "on" else "."
 
     rgrid = ""
 
-    for y in range(relativeSize):
-        for size in range(CONTENT_SIZE):
-            for x in range(relativeSize):
-                rgrid += (("{} ").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE]) + ("{} ").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE + 1]) + ("{}").format(grid[y*relativeSize + x + y][size * CONTENT_SIZE + 2]) + "   ")
-            rgrid += "\n"
-        rgrid += "\n" 
+    for i in range(relativeSize):
+        for j in range(relativeSize):
+            rgrid += ("{} {} {}   ".format(grid[i * relativeSize + j][0],grid[i * relativeSize + j][1],grid[i * relativeSize + j][2]))
+        rgrid += "\n"
+        for j in range(relativeSize):
+            rgrid += ("{} {} {}   ".format(grid[i * relativeSize + j][3],grid[i * relativeSize + j][4],grid[i * relativeSize + j][5]))
+        rgrid += "\n"
+        for j in range(relativeSize):
+            rgrid += ("{} {} {}   ".format(grid[i * relativeSize + j][6],grid[i * relativeSize + j][7],grid[i * relativeSize + j][8]))
+        rgrid += "\n\n"
         
     print(rgrid)
-
-    # for i in range(relativeSize):
-    #     for j in range(relativeSize):
-    #         print("{} {} {}   ".format('.','.','.'), end="")
-    #     print("\n",end="")
-    #     for j in range(relativeSize):
-    #         print("{} {} {}   ".format(' ', '?', ' '), end="")
-    #     print("\n",end="")
-    #     for j in range(relativeSize):
-    #         print("{} {} {}   ".format('.', '.', '.'), end="")
-    #     print("\n")
-
-
 
 def getPointer(o):
     if o == "north":

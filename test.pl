@@ -1,9 +1,21 @@
 
 :- dynamic([
-       visited/2
+       visited/2,
+       wumpus/2,
+       confundus/2,
+       tingle/2,
+       glitter/2,
+       stench/2,
+       safe/2,
+       wall/2,
+       move/2,
+       reposition/1,
+       current/3,
+       explore/1,
+       reborn/0,
+       hasarrow/0
 ]).
-
-visited(5,5).
+visited(1,1).
 visited(0,0).
 
 wumpus(X,Y) :-
