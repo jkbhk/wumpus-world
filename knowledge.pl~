@@ -46,21 +46,21 @@ check_equal(A,B) :-
        dead/1
 ]).
 
+visited(0,0).
 
-/* hasarrow :-
-	\+move(shoot,_),
-	write('Agent still has arrow').
-*/
+
+hasarrow :-
+	dead(wumpus) -> false ; true.
+
 
 
 reborn :-
-	%retractall(visited(_,_)),
-	retractall(wumpus(_,_)),
+	retractall(wumpus(_,_)),retractall(dead(_),
 	retractall(confundus(_,_)),%retractall(tingle(_,_)),
 	%retractall(glitter(_,_)),retractall(stench(_,_)),
 	%retractall(safe(_,_)),retractall(wall(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
-	retractall(explore(_)),retractall(hasarrow),
+	retractall(explore(_)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
         %relative positive (0,0), relative orientation is north
 
@@ -197,8 +197,8 @@ move(A,[_,_,_,_,_,Scream]) :-
 	A == shoot,
 	Scream == on,
 	assertz(dead(wumpus)),
-	write('Wumpus is dead');
-	write('Wumpus still alive').
+	write('Wumpus is dead') , nl ,
+	write('Agent has 0 arrows left').
 
 
 
@@ -243,8 +243,7 @@ tingle(X,Y) :-
 	assertz(confundus(X,S)). %bottom
 
 
-visited(X,Y) :-
-	assertz(visited(X,Y)).
+
 
 safe(X,Y) :-
 	\+wumpus(X,Y),
