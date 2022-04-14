@@ -235,13 +235,15 @@ def turn(x):
         orientation += x
 
     cells[currentCell][4] = getPointer(directions[orientation])
+    # turn bump(if it was on) off after turning
+    currentSenses[4] = "off"
 
 def sense():
     # Confounded, Stench, Tingle, Glitter, Bump, Scream.
     current = cells[currentCell]
     currentSenses[0] = "off"
     currentSenses[1] = "on" if current[1] == "=" else "off"
-    currentSenses[2] = "on" if current[1] == "T" else "off"
+    currentSenses[2] = "on" if current[2] == "T" else "off"
     currentSenses[3] = "on" if current[6] == "*" else "off"
     currentSenses[4] = "off"
     currentSenses[5] = "off"
@@ -300,16 +302,16 @@ def spawnConfundus():
     cells[x][4] = 'O'
 
     if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != "#"):
-        cells[x+1][1] = 'T'
+        cells[x+1][2] = 'T'
 
     if(x-1 >= 0 and x-1 < GRID_X*GRID_Y and cells[x-1][1] != "#"):
-        cells[x-1][1] = 'T'
+        cells[x-1][2] = 'T'
 
     if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y and cells[x+GRID_X][1] != "#"):
-        cells[x+GRID_X][1] = 'T'
+        cells[x+GRID_X][2] = 'T'
 
     if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y) and cells[x-GRID_X][1] != "#":    
-        cells[x-GRID_X][1] = 'T'
+        cells[x-GRID_X][2] = 'T'
 
 def spawnWumpus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
