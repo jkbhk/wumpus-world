@@ -3,7 +3,7 @@ import random
 from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
-prolog.consult("knowledge.pl")
+prolog.consult("test.pl")
 # print(list(prolog.query("check_equal(2,2)")))
 
 # coordinate translation
@@ -368,6 +368,7 @@ if __name__ == '__main__':
     spawnWumpus()
     spawnCoin()
     spawnAgent()
+    sense()
 
     while gameOver is False:
         displayGridDynamic()

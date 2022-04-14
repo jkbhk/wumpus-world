@@ -55,15 +55,12 @@ visited(0,0).
 
 
 reborn :-
-	%retractall(visited(_,_)),
+	
 	retractall(wumpus(_,_)), retractall(dead(_)),
-	retractall(confundus(_,_)),%retractall(tingle(_,_)),
-	%retractall(glitter(_,_)),retractall(stench(_,_)),
-	%retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(confundus(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
 	retractall(explore(_)),retractall(hasarrow),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
-        %relative positive (0,0), relative orientation is north
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
