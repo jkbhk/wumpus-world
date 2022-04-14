@@ -48,18 +48,17 @@ check_equal(A,B) :-
 
 visited(0,0).
 
-/* hasarrow :-
-	\+move(shoot,_),
-	write('Agent still has arrow').
-*/
+
+hasarrow :-
+	dead(wumpus) -> false ; true.
+
 
 
 reborn :-
-	
-	retractall(wumpus(_,_)), retractall(dead(_)),
+	retractall(wumpus(_,_)),retractall(dead(_)),
 	retractall(confundus(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
-	retractall(explore(_)),retractall(hasarrow),
+	retractall(explore(_)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
 
 /* reposition:
@@ -158,6 +157,7 @@ move(A,[off,_,_,_,off,_]) :-
 	assertz(current(NewX,Y,D)) ,
 	visited(NewX,Y), !.
 
+
 %When agent step into portal, do reposition
 move(A,[Confounded,_,_,_,_,_]) :-
 	A == moveforward,
@@ -193,9 +193,10 @@ move(A,[_,_,_,_,Bump,_]) :-
 move(A,[_,_,_,_,_,Scream]) :-
 	A == shoot,
 	Scream == on,
-	dead(wumpus),
-	write('wumpus is dead!'),
-        assertz(dead(wumpus)).
+	assertz(dead(wumpus)),
+	write('Wumpus is dead') , nl ,
+	write('Agent has 0 arrows left').
+
 
 
 /* Agent step on cell inhabited by wumpus:
