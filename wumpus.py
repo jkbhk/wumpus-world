@@ -3,7 +3,7 @@ import random
 from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
-prolog.consult("test.pl")
+prolog.consult("knowledge.pl")
 # print(list(prolog.query("check_equal(2,2)")))
 
 # coordinate translation
@@ -375,7 +375,9 @@ if __name__ == '__main__':
         displayRelativeGrid()
         print(currentSenses)
         printSenses()
-        temp = input("\nenter input: ")
-        handleInput(temp)
+
+        #temp = input("\nenter input: ")
+        #handleInput(temp)
+        
 
 
