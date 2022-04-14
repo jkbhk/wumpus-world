@@ -42,7 +42,8 @@ check_equal(A,B) :-
        current/3,
        explore/1,
        reborn/0,
-       hasarrow/0
+       hasarrow/0,
+       dead/1
 ]).
 
 
@@ -53,13 +54,14 @@ check_equal(A,B) :-
 
 
 reborn :-
-	retractall(visited(_,_)),retractall(wumpus(_,_)),
-	retractall(confundus(_,_)),retractall(tingle(_,_)),
-	retractall(glitter(_,_)),retractall(stench(_,_)),
-	retractall(safe(_,_)),retractall(wall(_,_)),
-	retractall(move(_,_)),retractall(reposition(_)),
-	retractall(current(_,_,_)),retractall(explore(_)),
-	retractall(hasarrow),assertz(current(0,0,rnorth)).
+	%retractall(visited(_,_)),
+	retractall(wumpus(_,_)), retractall(dead(_)),
+	retractall(confundus(_,_)),%retractall(tingle(_,_)),
+	%retractall(glitter(_,_)),retractall(stench(_,_)),
+	%retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(reposition(_)),retractall(current(_,_,_)),
+	retractall(explore(_)),retractall(hasarrow),
+	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
         %relative positive (0,0), relative orientation is north
 
 /* reposition:
@@ -74,7 +76,7 @@ reposition([on,_,_,_,_,_]) :-
 	retractall(confundus(_,_)),retractall(tingle(_,_)),
 	retractall(glitter(_,_)),retractall(stench(_,_)),
 	retractall(safe(_,_)),retractall(wall(_,_)),
-	assertz(current(0,0,rnorth)).
+	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
         % reset relative positive (0,0), relative orientation is north
 
 
@@ -85,15 +87,95 @@ reposition([on,_,_,_,_,_]) :-
 % glitter: if i move and got glitter, pick up coin
 % wall: if i move and hit a wall, receive a bump
 
-%
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
-%
+
+
+move(turnleft,[_,_,_,_,_,_]) :-
+	current(A,B,rnorth),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest));
+
+	current(A,B,rwest),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth));
+
+	current(A,B,rsouth),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast));
+
+	current(A,B,reast),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth)).
+
+
+move(turnright,[_,_,_,_,_,_]) :-
+	current(A,B,rnorth),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast));
+
+	current(A,B,rwest),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth));
+
+	current(A,B,rsouth),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest));
+
+	current(A,B,reast),
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth)).
+
+%Update the relative position of agent except when :
+% 1) agent enters portal
+% 2) agent bump against the wall
+% 3) agent receives scream (agent doesn't move just shoot only)
+move(A,[off,_,_,_,off,_]) :-
+	A == moveforward,
+
+	current(X,Y,D),
+	D == rnorth,
+	NewY is Y + 1,
+	retractall(current(_,_,_)),
+	assertz(current(X,NewY,D)) ,
+	visited(X,NewY), !;
+
+	current(X,Y,D),
+	D == rsouth,
+	NewY is Y - 1,
+	retractall(current(_,_,_)),
+	assertz(current(X,NewY,D)) ,
+	visited(X,NewY), !;
+
+	current(X,Y,D),
+	D == reast,
+	NewX is X + 1,
+	retractall(current(_,_,_)),
+	assertz(current(NewX,Y,D)) ,
+	visited(NewX,Y), !;
+
+	current(X,Y,D),
+	D == rwest,
+	NewX is X - 1,
+	retractall(current(_,_,_)),
+	assertz(current(NewX,Y,D)) ,
+	visited(NewX,Y), !.
+
+%When agent step into portal, do reposition
+move(A,[Confounded,_,_,_,_,_]) :-
+	A == moveforward,
+	Confounded == on,
+	reposition([on,_,_,_,_,_]).
 
 
 %When agent senses stench, set possible wumpus positions
 move(A,[_,Stench,_,_,_,_]) :-
 	A == moveforward,
 	Stench == on.
+
+%When agent senses tingle, set possible confundus portal positions
+move(A,[_,_,Tingle,_,_,_]) :-
+	A == moveforward,
+	Tingle == on.
 
 
 %When agent senses glitter, pickup coin
@@ -104,23 +186,23 @@ move(A,[_,_,_,Glitter,_,_]) :-
 move(pickup,[_,_,_,_,_,_]).
 
 
-%When agent senses tingle, set possible confundus portal positions
-move(A,[_,_,Tingle,_,_,_]) :-
-	A == moveforward,
-	Tingle == on.
-
-
-%When agent step into portal, do reposition
-move(A,[Confounded,_,_,_,_,_]) :-
-	A == moveforward,
-	Confounded == on,
-	reposition([on,_,_,_,_,_]).
-
 
 %When agent move forward and collides with a wall
 move(A,[_,_,_,_,Bump,_]) :-
 	A == moveforward,
 	Bump == on.
+
+move(A,[_,_,_,_,_,Scream]) :-
+	A == shoot,
+	Scream == on,
+	dead(wumpus),
+	write('wumpus is dead!'),
+        assertz(dead(wumpus));
+
+	Scream == off,
+	write('wumpus is still alive').
+
+
 
 
 /* Agent step on cell inhabited by wumpus:
