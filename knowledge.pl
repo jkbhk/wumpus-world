@@ -46,6 +46,7 @@ check_equal(A,B) :-
        dead/1
 ]).
 
+visited(0,0).
 
 /* hasarrow :-
 	\+move(shoot,_),
@@ -241,8 +242,7 @@ tingle(X,Y) :-
 	assertz(confundus(X,S)). %bottom
 
 
-visited(X,Y) :-
-	assertz(visited(X,Y)).
+
 
 safe(X,Y) :-
 	\+wumpus(X,Y),
