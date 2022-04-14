@@ -56,9 +56,10 @@ hasarrow :-
 
 reborn :-
 	retractall(wumpus(_,_)),retractall(dead(_)),
-	retractall(confundus(_,_)),%retractall(tingle(_,_)),
-	%retractall(glitter(_,_)),retractall(stench(_,_)),
-	%retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(stench(_,_)),retractall(visited(_,_)),
+	assertz(visited(0,0)),retractall(confundus(_,_)),
+	retractall(tingle(_,_)),retractall(glitter(_,_)),
+	retractall(safe(_,_)),retractall(wall(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
 	retractall(explore(_)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
@@ -171,18 +172,46 @@ move(A,[Confounded,_,_,_,_,_]) :-
 %When agent senses stench, set possible wumpus positions
 move(A,[_,Stench,_,_,_,_]) :-
 	A == moveforward,
-	Stench == on.
+	Stench == on,
+	current(X,Y,_),
+	assertz(visited(X,Y)),
+	assertz(stench(X,Y)),
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	assertz(wumpus(W,Y)), %left
+	assertz(wumpus(E,Y)), %right
+	assertz(wumpus(X,N)), %top
+	assertz(wumpus(X,S)). %bottom
+
 
 %When agent senses tingle, set possible confundus portal positions
 move(A,[_,_,Tingle,_,_,_]) :-
 	A == moveforward,
-	Tingle == on.
+	Tingle == on,
+	current(X,Y,_),
+	assertz(visited(X,Y)),
+	assertz(tingle(X,Y)),
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	assertz(confundus(W,Y)), %left
+	assertz(confundus(E,Y)), %right
+	assertz(confundus(X,N)), %top
+	assertz(confundus(X,S)). %bottom
 
 
 %When agent senses glitter, pickup coin
 move(A,[_,_,_,Glitter,_,_]) :-
 	A == moveforward,
-	Glitter == on.
+	Glitter == on,
+	current(X,Y,_),
+	assertz(visited(X,Y)),
+	assertz(glitter(X,Y)), %initially there was glitter
+	move(pickup,[_,_,_,_,_,_]),
+	retract(glitter(X,Y)). %once u pick the coin, glitter is gone*/
 
 move(pickup,[_,_,_,_,_,_]).
 
@@ -191,7 +220,10 @@ move(pickup,[_,_,_,_,_,_]).
 %When agent move forward and collides with a wall
 move(A,[_,_,_,_,Bump,_]) :-
 	A == moveforward,
-	Bump == on.
+	Bump == on,
+	current(X,Y,_),
+	assertz(visited(X,Y)),
+	assertz(wall(X,Y)).
 
 move(A,[_,_,_,_,_,Scream]) :-
 	A == shoot,
@@ -208,17 +240,17 @@ Confundus Portal, to prepare for a new game. All memory of previous
 steps and sensory reading is lost without exceptions, the arrow is
 returned to the Agent. */
 
-wall(X,Y) :-
+/*wall(X,Y) :-
 	move(moveforward,[_,_,_,_,on,_])->
-	assertz(wall(X,Y)).
+	assertz(wall(X,Y)). */
 
-glitter(X,Y) :-
+/*glitter(X,Y) :-
 	move(moveforward,[_,_,_,on,_,_])->
 	assertz(glitter(X,Y)), %initially there was glitter
 	move(pickup,[_,_,_,_,_,_]),
-	retract(glitter(X,Y)). %once u pick the coin, glitter is gone
+	retract(glitter(X,Y)). %once u pick the coin, glitter is gone*/
 
-stench(X,Y) :-
+/*stench(X,Y) :-
 	move(moveforward,[_,on,_,_,_,_])->
 	assertz(stench(X,Y)),
 	N is Y + 1, %top
@@ -228,9 +260,9 @@ stench(X,Y) :-
 	assertz(wumpus(W,Y)), %left
 	assertz(wumpus(E,Y)), %right
 	assertz(wumpus(X,N)), %top
-	assertz(wumpus(X,S)). %bottom
+	assertz(wumpus(X,S)). %bottom */
 
-tingle(X,Y) :-
+/*tingle(X,Y) :-
 	move(moveforward,[_,_,on,_,_,_])->
 	assertz(tingle(X,Y)),
 	N is Y + 1, %top
@@ -240,7 +272,7 @@ tingle(X,Y) :-
 	assertz(confundus(W,Y)), %left
 	assertz(confundus(E,Y)), %right
 	assertz(confundus(X,N)), %top
-	assertz(confundus(X,S)). %bottom
+	assertz(confundus(X,S)). %bottom*/
 
 
 
