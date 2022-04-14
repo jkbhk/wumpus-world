@@ -34,8 +34,10 @@ relativeSize = 3
 directions = ["north","east","south","west"]
 orientation = 0
 currentCell = 35
+prevNPC = "?"
 gameOver = False
 
+# Confounded, Stench, Tingle, Glitter, Bump, Scream.
 currentSenses = ["on","off","off","off","off","off"]
 
 cells = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(GRID_X * GRID_Y)]
@@ -96,19 +98,20 @@ def displayRelativeGrid():
     global relativeSize
 
     visited = list(prolog.query("visited(X,Y)"))
+    print("agent visited:")
     for coord in visited:
-        print(coord.get('X'), " .  ", coord.get('Y'))
         x = coord.get('X')
         y = coord.get('Y')
+        print("{},{}".format(x,y))
         if abs(x) > (relativeSize-1)/2 or abs(y) > (relativeSize-1)/2:
             relativeSize+=2
             return displayRelativeGrid()
         
     grid = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(relativeSize * relativeSize)]
     origin = (relativeSize*relativeSize - 1) / 2
+    print()
 
     for coord in visited:
-        print("sdfsaf")
         x = coord.get('X')
         y = coord.get('Y')
         target = int(origin) + x - (y * relativeSize)
@@ -178,11 +181,11 @@ def getPointer(o):
 
 def move():
 
+    global prevNPC
     global relativeSize
     global currentCell
     global gameOver
     prevCell = currentCell
-    prevNPC = cells[currentCell][4]
     
     facing = directions[orientation]
 
@@ -190,42 +193,37 @@ def move():
         if currentCell - GRID_X > -1:
             currentCell -= GRID_X
         else:
-            print("bump")
+            print("what are you doing?")
 
     if facing == "south":
         if currentCell + GRID_X < (GRID_X * GRID_Y):
             currentCell += GRID_X
         else:
-            print("bump")
+            print("what are you doing?")
 
     if facing == "east":
         if (currentCell) % GRID_X is not GRID_X-1:
             currentCell += 1
         else:
-            print("bump")
+            print("what are you doing?")
 
     if facing == "west":
         if (currentCell) % GRID_X is not 0:
             currentCell -= 1
         else:
-            print("bump")
+            print("what are you doing?")
 
 
     if cells[currentCell][0] == "#":
         currentCell = prevCell
-        print("wall")
-        sendWallBump()
+        sense()
+        currentSenses[4] = "on"
     else:
         cells[prevCell][4] = prevNPC
+        prevNPC = ""+cells[currentCell][4]
         cells[currentCell][4] = getPointer(directions[orientation])
-        prolog.assertz("visited(0,1)")
+        sense()
         
-
-    
-
-def sendWallBump():
-    print("sensed a bump")
-
 
 def turn(x):
     global orientation
@@ -237,6 +235,26 @@ def turn(x):
         orientation += x
 
     cells[currentCell][4] = getPointer(directions[orientation])
+
+def sense():
+    # Confounded, Stench, Tingle, Glitter, Bump, Scream.
+    current = cells[currentCell]
+    currentSenses[0] = "off"
+    currentSenses[1] = "on" if current[1] == "=" else "off"
+    currentSenses[2] = "on" if current[1] == "T" else "off"
+    currentSenses[3] = "on" if current[6] == "*" else "off"
+    currentSenses[4] = "off"
+    currentSenses[5] = "off"
+
+def printSenses():
+    a = "Confounded" if currentSenses[0] == "on" else "C"
+    b = "Stench" if currentSenses[1] == "on" else "S"
+    c = "Tingle" if currentSenses[2] == "on" else "T"
+    d = "Glitter" if currentSenses[3] == "on" else "G"
+    e = "Bump" if currentSenses[4] == "on" else "B"
+    f = "Scream" if currentSenses[5] == "on" else "S"
+
+    print("[{}-{}-{}-{}-{}-{}]".format(a,b,c,d,e,f))
 
 def handleInput(input):
     global orientation
@@ -352,6 +370,8 @@ if __name__ == '__main__':
     while gameOver is False:
         displayGridDynamic()
         displayRelativeGrid()
+        print(currentSenses)
+        printSenses()
         temp = input("\nenter input: ")
         handleInput(temp)
 

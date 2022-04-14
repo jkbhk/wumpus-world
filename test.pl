@@ -15,8 +15,9 @@
        reborn/0,
        hasarrow/0
 ]).
-visited(1,1).
+
 visited(0,0).
+current(0,0,(r)north)
 
 wumpus(X,Y) :-
     stench(X+1,Y);
