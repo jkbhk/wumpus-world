@@ -368,13 +368,16 @@ if __name__ == '__main__':
     spawnWumpus()
     spawnCoin()
     spawnAgent()
+    sense()
 
     while gameOver is False:
         displayGridDynamic()
         displayRelativeGrid()
         print(currentSenses)
         printSenses()
-        temp = input("\nenter input: ")
-        handleInput(temp)
+
+        #temp = input("\nenter input: ")
+        #handleInput(temp)
+        
 
 

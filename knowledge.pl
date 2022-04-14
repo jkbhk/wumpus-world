@@ -56,14 +56,10 @@ hasarrow :-
 
 reborn :-
 	retractall(wumpus(_,_)),retractall(dead(_)),
-	retractall(stench(_,_)),retractall(visited(_,_)),
-	assertz(visited(0,0)),retractall(confundus(_,_)),
-	retractall(tingle(_,_)),retractall(glitter(_,_)),
-	retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(confundus(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
 	retractall(explore(_)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
-        %relative positive (0,0), relative orientation is north
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
