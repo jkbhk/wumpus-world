@@ -43,28 +43,24 @@ check_equal(A,B) :-
        explore/1,
        reborn/0,
        hasarrow/0,
-       dead/1
+       dead/1,
+       hascoin/1
 ]).
-
-visited(0,0).
 
 
 hasarrow :-
 	dead(wumpus) -> false ; true.
 
 
-
 reborn :-
 	retractall(wumpus(_,_)),retractall(dead(_)),
-	retractall(stench(_,_)),retractall(visited(_,_)),
-	assertz(visited(0,0)),
-	retractall(confundus(_,_)),retractall(tingle(_,_)),
-	retractall(glitter(_,_)),
-	retractall(safe(_,_)),retractall(wall(_,_)),
+	retractall(confundus(_,_)),
 	retractall(reposition(_)),retractall(current(_,_,_)),
-	retractall(explore(_)),
+	%retractall(explore(_)),
+	retractall(stench(_,_)),retractall(tingle(_,_)),
+	retractall(glitter(_,_)),
+	retractall(visited(_,_)),assertz(visited(0,0)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
-        %relative positive (0,0), relative orientation is north
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
@@ -139,7 +135,7 @@ move(A,[off,_,_,_,off,_]) :-
 	NewY is Y + 1,
 	retractall(current(_,_,_)),
 	assertz(current(X,NewY,D)) ,
-	visited(X,NewY), !;
+	visited(X,NewY),!;
 
 	current(X,Y,D),
 	D == rsouth,
@@ -172,15 +168,17 @@ move(A,[Confounded,_,_,_,_,_]) :-
 
 %When agent senses stench, set possible wumpus positions
 move(A,[_,Stench,_,_,_,_]) :-
-	A == moveforward,
+        A == moveforward,
 	Stench == on,
 	current(X,Y,_),
 	assertz(visited(X,Y)),
+	assertz(safe(X,Y)),
 	assertz(stench(X,Y)),
 	N is Y + 1, %top
 	S is Y - 1, %bottom
 	E is X + 1, %right
 	W is X - 1, %left
+
 	assertz(wumpus(W,Y)), %left
 	assertz(wumpus(E,Y)), %right
 	assertz(wumpus(X,N)), %top
@@ -193,6 +191,7 @@ move(A,[_,_,Tingle,_,_,_]) :-
 	Tingle == on,
 	current(X,Y,_),
 	assertz(visited(X,Y)),
+	assertz(safe(X,Y)),
 	assertz(tingle(X,Y)),
 	N is Y + 1, %top
 	S is Y - 1, %bottom
@@ -210,11 +209,15 @@ move(A,[_,_,_,Glitter,_,_]) :-
 	Glitter == on,
 	current(X,Y,_),
 	assertz(visited(X,Y)),
+	assertz(safe(X,Y)),
 	assertz(glitter(X,Y)), %initially there was glitter
-	move(pickup,[_,_,_,_,_,_]),
+	move(pickup,[_,_,_,Glitter,_,_]),
 	retract(glitter(X,Y)). %once u pick the coin, glitter is gone*/
 
-move(pickup,[_,_,_,_,_,_]).
+
+move(pickup,[_,_,_,Glitter,_,_]) :-
+	Glitter == on,
+	assertz(hascoin(agent)).
 
 
 
@@ -224,12 +227,15 @@ move(A,[_,_,_,_,Bump,_]) :-
 	Bump == on,
 	current(X,Y,_),
 	assertz(visited(X,Y)),
+	assertz(safe(X,Y)),
 	assertz(wall(X,Y)).
 
 move(A,[_,_,_,_,_,Scream]) :-
 	A == shoot,
 	Scream == on,
 	assertz(dead(wumpus)),
+	retractall(wumpus(_,_)),
+	retractall(stench(_,_)),
 	write('Wumpus is dead') , nl ,
 	write('Agent has 0 arrows left').
 
@@ -280,8 +286,29 @@ returned to the Agent. */
 
 safe(X,Y) :-
 	\+wumpus(X,Y),
-	\+confundus(X,Y),
-	assertz(safe(X,Y)).
+	\+confundus(X,Y).
+
+
+explore(L) :-
+	current(X,Y,_),
+	NewY is Y + 1,
+	safe(X,NewY),
+	L = moveforward;
+
+	current(X,Y,_),
+	NewY is Y - 1,
+	safe(X,NewY);
+
+	current(X,Y,_),
+	NewX is X + 1,
+	safe(NewX,Y);
+
+	current(X,Y,_),
+	NewX is X - 1,
+	safe(NewX,Y),
+
+	explore(L).
+
 
 
 
