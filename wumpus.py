@@ -223,6 +223,14 @@ def move():
         print("Agent killed by wumpus.")
         print("Resetting world...")
         setupWorld()
+    elif cells[currentCell][4] == "O":
+        print("Stepped into portal.")
+        print("teleporting...")
+        cells[prevCell][4] = prevNPC
+        spawnAgent()
+        resetSenses()
+        sense()
+        currentSenses[0] = "on"  
     else:
         cells[prevCell][4] = prevNPC
         prevNPC = ""+cells[currentCell][4]
@@ -407,7 +415,7 @@ def spawnAgent():
     if cells[x][4] != '?':
         spawnAgent()
     else:
-        cells[x][4] = '^'
+        cells[x][4] = getPointer(directions[orientation])
         currentCell = x
 
 def setWalls():
