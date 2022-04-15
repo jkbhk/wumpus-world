@@ -1,9 +1,10 @@
 
+from cgitb import reset
 import random
 from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
-prolog.consult("knowledge.pl")
+prolog.consult("test.pl")
 # print(list(prolog.query("check_equal(2,2)")))
 
 # coordinate translation
@@ -32,6 +33,7 @@ CONTENT_SIZE = 3
 relativeSize = 3
 
 directions = ["north","east","south","west"]
+# orientation is the index of directions
 orientation = 0
 currentCell = 35
 prevNPC = "?"
@@ -184,7 +186,6 @@ def move():
     global prevNPC
     global relativeSize
     global currentCell
-    global gameOver
     prevCell = currentCell
     
     facing = directions[orientation]
@@ -218,6 +219,10 @@ def move():
         currentCell = prevCell
         sense()
         currentSenses[4] = "on"
+    elif cells[currentCell][4] == "W":
+        print("Agent killed by wumpus.")
+        print("Resetting world...")
+        setupWorld()
     else:
         cells[prevCell][4] = prevNPC
         prevNPC = ""+cells[currentCell][4]
@@ -260,6 +265,7 @@ def printSenses():
 
 def handleInput(input):
     global orientation
+    global gameOver
     
     if input == "turn left":
         turn(-1)
@@ -274,8 +280,14 @@ def handleInput(input):
         #print(bool(list(prolog.query("visited(0,1)"))))
         print(list(prolog.query("visited(X,Y)")))
 
+    if input == "end":
+        gameOver = True
+
     
 def initializeCellData():
+
+    global cells
+
     for i in range(len(cells)):
         cells[i][0] = "."
         cells[i][1] = "."
@@ -359,8 +371,17 @@ def setWalls():
         for i in range(len(cells[w])):
             cells[w][i] = '#'
 
-if __name__ == '__main__':
-    #test2()
+
+def resetSenses():
+    global currentSenses
+    for i in range(len(currentSenses)):
+        currentSenses[i] = "off"
+
+def resetAgent():
+    global orientation
+    orientation = 0
+
+def setupWorld():
     initializeCellData()
     setWalls()
     for i in range(3):
@@ -368,7 +389,13 @@ if __name__ == '__main__':
     spawnWumpus()
     spawnCoin()
     spawnAgent()
+    resetAgent()
+    resetSenses()
     sense()
+
+if __name__ == '__main__':
+    #test2()
+    setupWorld()
 
     while gameOver is False:
         displayGridDynamic()
@@ -376,8 +403,8 @@ if __name__ == '__main__':
         print(currentSenses)
         printSenses()
 
-        #temp = input("\nenter input: ")
-        #handleInput(temp)
+        temp = input("\nenter input: ")
+        handleInput(temp)
         
 
 

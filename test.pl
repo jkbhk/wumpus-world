@@ -42,5 +42,7 @@ safe(X,Y) :-
 %Confounded, Stench, Tingle, Glitter, Bump, Scream.
 
 
+    
+
 
 
