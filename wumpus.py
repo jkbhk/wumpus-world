@@ -263,6 +263,55 @@ def printSenses():
 
     print("[{}-{}-{}-{}-{}-{}]".format(a,b,c,d,e,f))
 
+def grabCoin():
+    global cells
+
+    if cells[currentCell][6] == "*":
+        cells[currentCell][6] = "."
+
+
+def shoot():
+    global cells
+    global currentSenses
+
+    fly = 1
+
+    if orientation == 0:
+        fly = -GRID_X
+    elif orientation == 1:
+        fly = 1
+    elif orientation == 2:
+        fly = GRID_X
+    elif orientation == 3:
+        fly = -1
+
+    nextCell = currentCell + fly
+
+    while nextCell >= 0 and nextCell < (GRID_X * GRID_Y):
+        if cells[nextCell][4] == "W":
+            currentSenses[5] = "on"
+            cells[nextCell][4] = "S"
+
+            x = nextCell
+
+            if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != '#'):
+                cells[x+1][1] = '.'
+
+            if(x-1 >= 0 and x-1 < GRID_X*GRID_Y and cells[x-1][1] != '#'):
+                cells[x-1][1] = '.'
+
+            if(x+GRID_X >= 0 and x+GRID_X < GRID_X*GRID_Y and cells[x+GRID_X][1] != '#'):
+                cells[x+GRID_X][1] = '.'
+
+            if(x-GRID_X >= 0 and x-GRID_X < GRID_X*GRID_Y and cells[x-GRID_X][1] != '#'):    
+                cells[x-GRID_X][1] = '.'
+
+
+            break
+        
+        nextCell += fly
+
+
 def handleInput(input):
     global orientation
     global gameOver
@@ -282,6 +331,9 @@ def handleInput(input):
 
     if input == "end":
         gameOver = True
+
+    if input == "shoot":
+        shoot()
 
     
 def initializeCellData():
@@ -399,7 +451,7 @@ if __name__ == '__main__':
 
     while gameOver is False:
         displayGridDynamic()
-        displayRelativeGrid()
+        #displayRelativeGrid()
         print(currentSenses)
         printSenses()
 
