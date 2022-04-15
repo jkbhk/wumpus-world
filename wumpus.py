@@ -5,7 +5,7 @@ from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
 prolog.consult("test.pl")
-# print(list(prolog.query("check_equal(2,2)")))
+print(list(prolog.query("visited(X,Y)")))
 
 # coordinate translation
 # examples
@@ -335,7 +335,8 @@ def handleInput(input):
 
     if input == "test":
         #print(bool(list(prolog.query("visited(0,1)"))))
-        print(list(prolog.query("visited(X,Y)")))
+        prolog.query("reborn.")
+        print(list(prolog.query("explore(L)")))
 
     if input == "end":
         gameOver = True
