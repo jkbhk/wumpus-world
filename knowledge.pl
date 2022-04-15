@@ -127,36 +127,37 @@ move(turnright,[_,_,_,_,_,_]) :-
 % 1) agent enters portal
 % 2) agent bump against the wall
 % 3) agent receives scream (agent doesn't move just shoot only)
-move(A,[off,_,_,_,off,_]) :-
+move(A,[off,_,_,_,off,off]) :-
 	A == moveforward,
+
 
 	current(X,Y,D),
 	D == rnorth,
 	NewY is Y + 1,
 	retractall(current(_,_,_)),
 	assertz(current(X,NewY,D)) ,
-	visited(X,NewY),!;
+	assertz(visited(X,NewY)),!;
 
 	current(X,Y,D),
 	D == rsouth,
 	NewY is Y - 1,
 	retractall(current(_,_,_)),
-	assertz(current(X,NewY,D)) ,
-	visited(X,NewY), !;
+	assertz(current(X,NewY,D)),
+	assertz(visited(X,NewY)),!;
 
 	current(X,Y,D),
 	D == reast,
 	NewX is X + 1,
 	retractall(current(_,_,_)),
-	assertz(current(NewX,Y,D)) ,
-	visited(NewX,Y), !;
+	assertz(current(NewX,Y,D)),
+	assertz(visited(NewX,Y)),!;
 
 	current(X,Y,D),
 	D == rwest,
 	NewX is X - 1,
 	retractall(current(_,_,_)),
-	assertz(current(NewX,Y,D)) ,
-	visited(NewX,Y), !.
+	assertz(current(NewX,Y,D)),
+	assertz(visited(NewX,Y)), !.
 
 
 %When agent step into portal, do reposition
@@ -171,7 +172,6 @@ move(A,[_,Stench,_,_,_,_]) :-
         A == moveforward,
 	Stench == on,
 	current(X,Y,_),
-	assertz(visited(X,Y)),
 	assertz(safe(X,Y)),
 	assertz(stench(X,Y)),
 	N is Y + 1, %top
@@ -190,7 +190,6 @@ move(A,[_,_,Tingle,_,_,_]) :-
 	A == moveforward,
 	Tingle == on,
 	current(X,Y,_),
-	assertz(visited(X,Y)),
 	assertz(safe(X,Y)),
 	assertz(tingle(X,Y)),
 	N is Y + 1, %top
@@ -208,7 +207,6 @@ move(A,[_,_,_,Glitter,_,_]) :-
 	A == moveforward,
 	Glitter == on,
 	current(X,Y,_),
-	assertz(visited(X,Y)),
 	assertz(safe(X,Y)),
 	assertz(glitter(X,Y)), %initially there was glitter
 	move(pickup,[_,_,_,Glitter,_,_]),
