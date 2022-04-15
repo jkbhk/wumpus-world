@@ -335,6 +335,10 @@ def handleInput(input):
     if input == "shoot":
         shoot()
 
+    if input == "grab":
+        grabCoin()
+        sense()
+
     
 def initializeCellData():
 
