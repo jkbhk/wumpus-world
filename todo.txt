@@ -5,4 +5,6 @@ integrate
 issues found:
 agent tingle not updated/asserting ?
 agent went missing after stepping into confundus
+agent still has knowledge of visited after stepping into portal
 wumpus prediction not accurate
+safe needs rework

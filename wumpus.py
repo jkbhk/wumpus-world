@@ -38,13 +38,13 @@ directions = ["north","east","south","west"]
 # orientation is the index of directions
 orientation = 0
 currentCell = 35
-prevNPC = "?"
+prevNPC = "s"
 gameOver = False
 
 # Confounded, Stench, Tingle, Glitter, Bump, Scream.
 currentSenses = ["on","off","off","off","off","off"]
 
-cells = [["?" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(GRID_X * GRID_Y)]
+cells = [["s" for i in range(CONTENT_SIZE * CONTENT_SIZE)] for j in range(GRID_X * GRID_Y)]
 
 for elem in cells[0]:
     elem += "1"
@@ -136,7 +136,6 @@ def displayRelativeGrid():
             temp = "O"
         elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
             direction = list(prolog.query("current({},{},D)".format(x,y)))[0].get('D')
-            print("direction is ", direction)
             if direction == "rnorth":
                 direction = "^"
             elif direction == "rsouth":
@@ -436,7 +435,7 @@ def initializeCellData():
         cells[i][1] = "."
         cells[i][2] = "."
         cells[i][3] = " "
-        cells[i][4] = "?"
+        cells[i][4] = "s"
         cells[i][5] = " "
         cells[i][6] = "."
         cells[i][7] = "."
@@ -451,7 +450,7 @@ def spawnCoin():
 
 def spawnConfundus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][4] != '?':
+    if cells[x][4] != 's':
         return spawnConfundus()
 
     cells[x][4] = 'O'
@@ -470,7 +469,7 @@ def spawnConfundus():
 
 def spawnWumpus():
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][4] != '?':
+    if cells[x][4] != 's':
         return spawnWumpus()
 
     cells[x][4] = 'W'
@@ -491,7 +490,7 @@ def spawnAgent():
     global currentCell
 
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][4] != '?':
+    if cells[x][4] != 's':
         spawnAgent()
     else:
         cells[x][4] = getPointer(directions[orientation])
@@ -546,7 +545,7 @@ if __name__ == '__main__':
         print(currentSenses)
         printSenses()
 
-        temp = input("\nenter input: ")
+        temp = input("\ntest input: ")
         handleInput(temp)
         
 
