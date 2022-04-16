@@ -4,8 +4,7 @@ import random
 from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
-prolog.consult("test.pl")
-print(list(prolog.query("visited(X,Y)")))
+prolog.consult("knowledge.pl")
 
 # coordinate translation
 # examples
@@ -132,6 +131,7 @@ def displayRelativeGrid():
         elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
             temp = "O"
         elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
+            print("sadfasdf")
             direction = list(prolog.query("current({},{},D)".format(x,y)))[0]
             if direction == "(r)north":
                 direction = "^"
@@ -150,6 +150,7 @@ def displayRelativeGrid():
         else:
             temp = "?"
 
+        print(temp)
         grid[target][4] = temp
         grid[target][5] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
         grid[target][6] = '*' if bool(list(prolog.query("glitter({},{})".format(x,y)))) else "."
@@ -336,7 +337,11 @@ def handleInput(input):
     if input == "test":
         #print(bool(list(prolog.query("visited(0,1)"))))
         prolog.query("reborn.")
-        print(list(prolog.query("explore(L)")))
+        print((bool(list(prolog.query("hasarrow")))))
+        prolog.query("move(shoot,[off,off,off,off,off,on])")
+        print((bool(list(prolog.query("hasarrow")))))
+        print((list(prolog.query("current(X,Y,D)"))))
+        #print(list(prolog.query("explore(L)")))
 
     if input == "end":
         gameOver = True
@@ -464,7 +469,7 @@ if __name__ == '__main__':
 
     while gameOver is False:
         displayGridDynamic()
-        #displayRelativeGrid()
+        displayRelativeGrid()
         print(currentSenses)
         printSenses()
 

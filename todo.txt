@@ -1,1 +1,3 @@
-none
+wumpus/confundus checksuspicious
+explore
+integrate
