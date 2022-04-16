@@ -1,3 +1,7 @@
 wumpus/confundus checksuspicious
 explore
 integrate
+
+issues found:
+agent tingle not updated/asserting ?
+agent went missing after stepping into confundus

@@ -135,7 +135,8 @@ def displayRelativeGrid():
         elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
             temp = "O"
         elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
-            direction = list(prolog.query("current(X,Y,D)"))[0].get('D')
+            direction = list(prolog.query("current({},{},D)".format(x,y)))[0].get('D')
+            print("direction is ", direction)
             if direction == "rnorth":
                 direction = "^"
             elif direction == "rsouth":

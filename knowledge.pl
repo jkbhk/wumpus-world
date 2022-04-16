@@ -185,41 +185,53 @@ pickup:-
 	assertz(hascoin(agent)),
 	retractall(glitter(_,_)).
 
+move(turnright,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnRight(X,Y,D).
 
-move(turnleft,[_,_,_,_,_,_]) :-
-	current(A,B,rnorth),
+handleTurnRight(A,B,D) :-
+	D == rnorth,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,rwest));
+	assertz(current(A,B,reast)).
 
-	current(A,B,rwest),
+handleTurnRight(A,B,D) :-
+	D == reast,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,rsouth));
+	assertz(current(A,B,rsouth)).
 
-	current(A,B,rsouth),
+handleTurnRight(A,B,D) :-
+	D == rsouth,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,reast));
+	assertz(current(A,B,rwest)).
 
-	current(A,B,reast),
+handleTurnRight(A,B,D) :-
+	D == rwest,
 	retractall(current(_,_,_)),
 	assertz(current(A,B,rnorth)).
 
+move(turnleft,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnLeft(X,Y,D).
 
-move(turnright,[_,_,_,_,_,_]) :-
-    current(A,B,rnorth),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,reast));
+handleTurnLeft(A,B,D) :-
+	D == rnorth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest)).
 
-    current(A,B,rwest),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rnorth));
+handleTurnLeft(A,B,D) :-
+	D == rwest,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth)).
 
-    current(A,B,rsouth),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rwest));
+handleTurnLeft(A,B,D) :-
+	D == rsouth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast)).
 
-    current(A,B,reast),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rsouth)).
+handleTurnLeft(A,B,D) :-
+	D == reast,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth)).
 
 
 
