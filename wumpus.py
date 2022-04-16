@@ -1,5 +1,7 @@
 
 from cgitb import reset
+from code import interact
+from math import floor
 import random
 from webbrowser import Grail
 from pyswip import Prolog
@@ -130,16 +132,15 @@ def displayRelativeGrid():
             temp = "W"
         elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
             temp = "O"
-        elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
-            print("sadfasdf")
-            direction = list(prolog.query("current({},{},D)".format(x,y)))[0]
-            if direction == "(r)north":
+        elif len(list(prolog.query("current(X,Y,D)"))) > 0:
+            direction = list(prolog.query("current(X,Y,D)"))[0].get('D')
+            if direction == "rnorth":
                 direction = "^"
-            elif direction == "(r)south":
+            elif direction == "rsouth":
                 direction = "v"
-            elif direction == "(r)east":
+            elif direction == "reast":
                 direction = ">"
-            elif direction == "(r)west":
+            elif direction == "rwest":
                 direction = "<"
 
             temp = direction
@@ -150,7 +151,6 @@ def displayRelativeGrid():
         else:
             temp = "?"
 
-        print(temp)
         grid[target][4] = temp
         grid[target][5] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
         grid[target][6] = '*' if bool(list(prolog.query("glitter({},{})".format(x,y)))) else "."
@@ -171,6 +171,19 @@ def displayRelativeGrid():
         rgrid += "\n\n"
         
     print(rgrid)
+
+def getCoordForRelativeCell(index):
+    # offset from center
+    offset =  (((relativeSize-1)/2))
+    # max x or y allowed
+    cutoff = (((relativeSize-1)/2)+offset)
+    for i in range(relativeSize * relativeSize):
+        print("x = ",  int((floor(i%relativeSize) + offset) % cutoff) * (-1 if (floor(i%relativeSize) + offset) < cutoff else 1 ))
+        print("y = ",  int((floor(i/relativeSize) + offset) % cutoff) * (-1 if (floor(i/relativeSize) + offset) > cutoff else 1 ))
+        print()
+
+
+
 
 def getPointer(o):
     if o == "north":
@@ -327,27 +340,34 @@ def handleInput(input):
     
     if input == "turn left":
         turn(-1)
+        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "turn right":
         turn(1)
+        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
         
     if input == "move":
         move()
+        print(bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "test":
         #print(bool(list(prolog.query("visited(0,1)"))))
-        prolog.query("reborn.")
-        print((bool(list(prolog.query("hasarrow")))))
-        prolog.query("move(shoot,[off,off,off,off,off,on])")
-        print((bool(list(prolog.query("hasarrow")))))
+        print(bool(list(prolog.query("reborn"))))
+        #print((bool(list(prolog.query("hasarrow")))))
+        #prolog.query("move(shoot,[off,off,off,off,off,on])")
+        #print((bool(list(prolog.query("hasarrow")))))
         print((list(prolog.query("current(X,Y,D)"))))
         #print(list(prolog.query("explore(L)")))
+
+    if input == "m":
+        getCoordForRelativeCell(2)
 
     if input == "end":
         gameOver = True
 
     if input == "shoot":
         shoot()
+        print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "grab":
         grabCoin()
