@@ -158,7 +158,7 @@ def displayRelativeGrid():
         grid[i][5] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
         grid[i][6] = '*' if bool(list(prolog.query("glitter({},{})".format(x,y)))) else "."
         grid[i][7] = 'B' if currentSenses[4] == "on" and x == agentRelativePos[0] and y == agentRelativePos[1] else "."
-        grid[i][8] = '@' if currentSenses[5] == "on" else "."
+        grid[i][8] = '@' if currentSenses[5] == "on" and x == agentRelativePos[0] and y == agentRelativePos[1] else "."
 
 
 
