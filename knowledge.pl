@@ -95,7 +95,8 @@ reposition([_,_,_,_,_,_]) :-
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
 
 clearData(X,Y) :-
-	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),retract(confundus(X,Y));
+	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),
+	retract(confundus(X,Y));
 	wumpus(X,Y), \+confundus(X,Y) -> retract(wumpus(X,Y));
 	\+wumpus(X,Y), confundus(X,Y) -> retract(confundus(X,Y)).
 

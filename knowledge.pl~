@@ -95,7 +95,8 @@ reposition([_,_,_,_,_,_]) :-
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
 
 clearData(X,Y) :-
-	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),retract(confundus(X,Y));
+	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),
+	retract(confundus(X,Y));
 	wumpus(X,Y), \+confundus(X,Y) -> retract(wumpus(X,Y));
 	\+wumpus(X,Y), confundus(X,Y) -> retract(confundus(X,Y)).
 
@@ -288,9 +289,10 @@ move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	(
 		(checkVerySafe([Confounded,Stench,Tingle,Glitter,Bump,_]) , false);
 		(checkStench(Stench) , false);
-		(checkConfounded([Confounded,Stench,Tingle,Glitter,Bump,_]) , false);
 		(checkTingle(Tingle) , false);
-		(checkGlitter(Glitter) , false)
+		(checkGlitter(Glitter) , false);
+		(checkConfounded([Confounded,Stench,Tingle,Glitter,Bump,_])
+		, false)
 	).
 
 move(A,[_,_,_,_,Bump,_]) :-
