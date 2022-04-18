@@ -1,9 +1,6 @@
-confundus checksuspicious
 explore
 integrate
 retract wumpusCount when encounter wall
 
 issues found:
-agent tingle not updated/asserting ?
-agent went missing after stepping into confundus
-agent still has knowledge of visited after stepping into portal
+agent went missing after stepping into confundus??

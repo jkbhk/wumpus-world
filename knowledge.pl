@@ -47,7 +47,8 @@ check_equal(A,B) :-
        hascoin/1,
        shootArrow/0,
        markWumpusIfSuspicious/2,
-       locationFound/1
+       locationFound/1,
+       uncollectedCoins/1
 ]).
 
 hasarrow :-
@@ -56,8 +57,7 @@ hasarrow :-
 
 reborn :-
 	retractall(wumpus(_,_)),retractall(dead(_)),
-	retractall(confundus(_,_)),
-	retractall(reposition(_)),retractall(current(_,_,_)),
+	retractall(confundus(_,_)),retractall(current(_,_,_)),
 	retractall(shootArrow),
 	retractall(stench(_,_)),retractall(tingle(_,_)),
 	retractall(glitter(_,_)),retractall(wall(_,_)),
@@ -73,13 +73,16 @@ reset to become the Relative North. All memory of previous steps and
 sensory readings is lost, except the fact of existence of uncollected
 coins, whether the Wumpus is alive and whether the Agent has the
 arrow.*/
-reposition([on,_,_,_,_,_]) :-
-	retractall(visited(_,_)),retractall(wumpus(_,_)),
-	retractall(confundus(_,_)),retractall(tingle(_,_)),
-	retractall(glitter(_,_)),retractall(stench(_,_)),
-	retractall(safe(_,_)),retractall(wall(_,_)),
+reposition([_,_,_,_,_,_]) :-
+	retractall(wumpus(_,_)),
+	retractall(confundus(_,_)), retractall(tingle(_,_)),
+	retractall(stench(_,_)),
+	retractall(visited(_,_)), assertz(visited(0,0)),
+	retractall(safe(_,_)), assertz(safe(0,0)),
+	retractall(wall(_,_)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
         % reset relative positive (0,0), relative orientation is north
+
 
 
 % visited: if in databse, return true, else return false (for every
@@ -191,9 +194,10 @@ checkStench(STENCH) :-
 	( not((visited(W, Y) ,\+stench(W,Y))),retract(wumpus(X,Y)))	)	     . */
 
 
-checkConfounded(CONFOUNDED) :-
+checkConfounded([CONFOUNDED,_,_,_,_,_]) :-
 	CONFOUNDED == on,
-	reposition([on,_,_,_,_,_]).
+	reposition([CONFOUNDED,_,_,_,_,_]).
+
 
 checkTingle(TINGLE) :-
 	TINGLE == on,
@@ -284,9 +288,10 @@ move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	(
 		(checkVerySafe([Confounded,Stench,Tingle,Glitter,Bump,_]) , false);
 		(checkStench(Stench) , false);
-		(checkConfounded(Confounded) , false);
 		(checkTingle(Tingle) , false);
-		(checkGlitter(Glitter) , false)
+		(checkGlitter(Glitter) , false);
+		(checkConfounded([Confounded,Stench,Tingle,Glitter,Bump,_])
+		, false)
 	).
 
 move(A,[_,_,_,_,Bump,_]) :-
@@ -326,7 +331,7 @@ move(A,[_,_,_,_,_,_]) :-
 	pickup.
 
 move(A,[_,_,_,_,_,Scream]) :-
-     A == shoot, assertz(shootArrow),
+     A == shoot, hasarrow, assertz(shootArrow),
      Scream == on ->
      ( assertz(dead(wumpus)),
      retractall(wumpus(_,_)),
