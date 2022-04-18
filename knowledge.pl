@@ -46,7 +46,8 @@ check_equal(A,B) :-
        dead/1,
        hascoin/1,
        shootArrow/0,
-	   markWumpusIfSuspicious/2
+	   markWumpusIfSuspicious/2,
+	   locationFound/1
 ]).
 
 hasarrow :-
@@ -62,7 +63,8 @@ reborn :-
 	retractall(glitter(_,_)),retractall(wall(_,_)),
 	retractall(visited(_,_)),assertz(visited(0,0)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
-	retractall(safe(_,_)), assertz(safe(0,0)).
+	retractall(safe(_,_)), assertz(safe(0,0)),
+	retractall(locationFound(_)).
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
@@ -137,10 +139,11 @@ confirmNoWumpus(X,Y) :-
 	( visited(X, S),\+stench(X,S));
 	( visited(E, Y),\+stench(E,Y));
 	( visited(W, Y),\+stench(W,Y))).
-
+	
 
 markWumpusIfSuspicious(X,Y) :-
-	\+confirmNoWumpus(X,Y), assertz(wumpus(X,Y)), false.
+	\+locationFound(wumpus), \+confirmNoWumpus(X,Y), assertz(wumpus(X,Y))
+	,false.
 
 checkStench(STENCH) :-
 	STENCH == on,
@@ -319,7 +322,16 @@ markAdjacentSafe(X,Y) :-
 	assertz(safe(X,N)), (retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
 	assertz(safe(X,S)),	(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
 	assertz(safe(E,Y)),	(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
-	assertz(safe(W,Y)), (retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true).
+	assertz(safe(W,Y)), (retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
+	findWumpus.
+
+
+
+findWumpus :-
+	aggregate_all(count, wumpus(_,_), WumpusCount), 
+	WumpusCount == 1,
+	assertz(locationFound(wumpus)).
+
 
 /*explore(L) :-
 	current(X,Y,_),
