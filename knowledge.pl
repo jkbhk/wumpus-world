@@ -185,9 +185,6 @@ pickup:-
 	assertz(hascoin(agent)),
 	retractall(glitter(_,_)).
 
-move(turnright,[_,_,_,_,_,_]) :-
-	current(X,Y,D),
-	handleTurnRight(X,Y,D).
 
 handleTurnRight(A,B,D) :-
 	D == rnorth,
@@ -208,34 +205,36 @@ handleTurnRight(A,B,D) :-
 	D == rwest,
 	retractall(current(_,_,_)),
 	assertz(current(A,B,rnorth)).
+
+
+handleTurnLeft(A,B,D) :-
+	D == rnorth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest)).
+
+handleTurnLeft(A,B,D) :-
+	D == rwest,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth)).
+
+handleTurnLeft(A,B,D) :-
+	D == rsouth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast)).
+
+handleTurnLeft(A,B,D) :-
+	D == reast,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth)).
+
 
 move(turnleft,[_,_,_,_,_,_]) :-
 	current(X,Y,D),
 	handleTurnLeft(X,Y,D).
 
-handleTurnLeft(A,B,D) :-
-	D == rnorth,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rwest)).
-
-handleTurnLeft(A,B,D) :-
-	D == rwest,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rsouth)).
-
-handleTurnLeft(A,B,D) :-
-	D == rsouth,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,reast)).
-
-handleTurnLeft(A,B,D) :-
-	D == reast,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rnorth)).
-
-
-
-
+move(turnright,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnRight(X,Y,D).
 
 move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	A == moveforward,

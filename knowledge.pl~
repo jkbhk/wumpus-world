@@ -134,20 +134,20 @@ checkStench(STENCH) :-
 	E is X + 1, %right
 	W is X - 1, %left
 	(      \+visited(W,Y),assertz(wumpus(W,Y))) ,
-	       checkSuspiciousStench(W,Y), %left
+	       %checkSuspiciousStench(W,Y), %left
 
 	(      \+visited(E,Y),assertz(wumpus(E,Y)))  ,
-	       checkSuspiciousStench(E,Y), %right
+	       %checkSuspiciousStench(E,Y), %right
 
 
 	(      \+visited(X,N),assertz(wumpus(X,N)))  ,
-	        checkSuspiciousStench(X,N),%top
+	        %checkSuspiciousStench(X,N),%top
 
 
-	(      \+visited(X,S), assertz(wumpus(X,S)),
-	       checkSuspiciousStench(X,S)). %bottom
+	(      \+visited(X,S), assertz(wumpus(X,S))).
+	       %checkSuspiciousStench(X,S)). %bottom
 
-checkSuspiciousStench(X,Y) :-
+/*checkSuspiciousStench(X,Y) :-
 	N is Y + 1, %top
 	S is Y - 1, %bottom
         E is X + 1, %right
@@ -155,7 +155,7 @@ checkSuspiciousStench(X,Y) :-
 (	( not(( visited(X, N),\+stench(X,N))) ,retract(wumpus(X,Y))	);
 	( not((visited(X, S) ,\+stench(X,S))),retract(wumpus(X,Y))	);
 	( not((visited(E, Y) ,\+stench(E,Y))),retract(wumpus(X,Y))	);
-	( not((visited(W, Y) ,\+stench(W,Y))),retract(wumpus(X,Y)))	)	     .
+	( not((visited(W, Y) ,\+stench(W,Y))),retract(wumpus(X,Y)))	)	     . */
 
 
 checkConfounded(CONFOUNDED) :-
@@ -185,41 +185,53 @@ pickup:-
 	assertz(hascoin(agent)),
 	retractall(glitter(_,_)).
 
+move(turnright,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnRight(X,Y,D).
 
-move(turnleft,[_,_,_,_,_,_]) :-
-	current(A,B,rnorth),
+handleTurnRight(A,B,D) :-
+	D == rnorth,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,rwest));
+	assertz(current(A,B,reast)).
 
-	current(A,B,rwest),
+handleTurnRight(A,B,D) :-
+	D == reast,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,rsouth));
+	assertz(current(A,B,rsouth)).
 
-	current(A,B,rsouth),
+handleTurnRight(A,B,D) :-
+	D == rsouth,
 	retractall(current(_,_,_)),
-	assertz(current(A,B,reast));
+	assertz(current(A,B,rwest)).
 
-	current(A,B,reast),
+handleTurnRight(A,B,D) :-
+	D == rwest,
 	retractall(current(_,_,_)),
 	assertz(current(A,B,rnorth)).
 
+move(turnleft,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnLeft(X,Y,D).
 
-move(turnright,[_,_,_,_,_,_]) :-
-    current(A,B,rnorth),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,reast));
+handleTurnLeft(A,B,D) :-
+	D == rnorth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest)).
 
-    current(A,B,rwest),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rnorth));
+handleTurnLeft(A,B,D) :-
+	D == rwest,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth)).
 
-    current(A,B,rsouth),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rwest));
+handleTurnLeft(A,B,D) :-
+	D == rsouth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast)).
 
-    current(A,B,reast),
-    retractall(current(_,_,_)),
-    assertz(current(A,B,rsouth)).
+handleTurnLeft(A,B,D) :-
+	D == reast,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth)).
 
 
 
