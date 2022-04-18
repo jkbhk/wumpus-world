@@ -45,7 +45,8 @@ check_equal(A,B) :-
        hasarrow/0,
        dead/1,
        hascoin/1,
-       shootArrow/0
+       shootArrow/0,
+	   markWumpusIfSuspicious/2
 ]).
 
 hasarrow :-
@@ -60,7 +61,8 @@ reborn :-
 	retractall(stench(_,_)),retractall(tingle(_,_)),
 	retractall(glitter(_,_)),retractall(wall(_,_)),
 	retractall(visited(_,_)),assertz(visited(0,0)),
-	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
+	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
+	retractall(safe(_,_)), assertz(safe(0,0)).
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
@@ -125,6 +127,21 @@ advance :-
 	assertz(current(NewX,Y,D)),
 	assertz(visited(NewX,Y)).
 
+
+confirmNoWumpus(X,Y) :-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+    E is X + 1, %right
+	W is X - 1, %left
+	(( visited(X, N),\+stench(X,N));
+	( visited(X, S),\+stench(X,S));
+	( visited(E, Y),\+stench(E,Y));
+	( visited(W, Y),\+stench(W,Y))).
+
+
+markWumpusIfSuspicious(X,Y) :-
+	\+confirmNoWumpus(X,Y), assertz(wumpus(X,Y)), false.
+
 checkStench(STENCH) :-
 	STENCH == on,
 	current(X,Y,_),
@@ -133,19 +150,13 @@ checkStench(STENCH) :-
 	S is Y - 1, %bottom
 	E is X + 1, %right
 	W is X - 1, %left
-	(      \+visited(W,Y),assertz(wumpus(W,Y))) ,
-	       %checkSuspiciousStench(W,Y), %left
+	(
+	markWumpusIfSuspicious(W,Y); %left
+	markWumpusIfSuspicious(E,Y); %right
+	markWumpusIfSuspicious(X,N); %top
+	markWumpusIfSuspicious(X,S) %bottom
+	).
 
-	(      \+visited(E,Y),assertz(wumpus(E,Y)))  ,
-	       %checkSuspiciousStench(E,Y), %right
-
-
-	(      \+visited(X,N),assertz(wumpus(X,N)))  ,
-	        %checkSuspiciousStench(X,N),%top
-
-
-	(      \+visited(X,S), assertz(wumpus(X,S))).
-	       %checkSuspiciousStench(X,S)). %bottom
 
 /*checkSuspiciousStench(X,Y) :-
 	N is Y + 1, %top
@@ -236,6 +247,7 @@ move(turnright,[_,_,_,_,_,_]) :-
 	current(X,Y,D),
 	handleTurnRight(X,Y,D).
 
+
 move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	A == moveforward,
 	Bump == off,
@@ -288,14 +300,10 @@ move(A,[_,_,_,_,_,Scream]) :-
      retractall(wumpus(_,_)),
      retractall(stench(_,_))).
 
-
-
-safe(X,Y) :-
-(	\+wumpus(X,Y),
-	\+confundus(X,Y)) ;
-         visited(X,Y).
-
-
+/*
+checkSafe([Confounded,Stench,Tingle,Glitter,Bump,Scream]) :-
+	Stench :- 
+*/
 /*explore(L) :-
 	current(X,Y,_),
 	NewY is Y + 1,
