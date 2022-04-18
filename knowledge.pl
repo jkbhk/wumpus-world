@@ -252,10 +252,15 @@ move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	A == moveforward,
 	Bump == off,
 	advance,
-	checkStench(Stench),
-        checkConfounded(Confounded),
-	checkTingle(Tingle),
-        checkGlitter(Glitter).
+	current(X,Y,_),
+	assertz(safe(X,Y)),
+	(
+		(checkVerySafe([Confounded,Stench,Tingle,Glitter,Bump,_]) , false);
+		(checkStench(Stench) , false);
+		(checkConfounded(Confounded) , false);
+		(checkTingle(Tingle) , false);
+		(checkGlitter(Glitter) , false)
+	).
 
 move(A,[_,_,_,_,Bump,_]) :-
 	A == moveforward,
@@ -300,10 +305,22 @@ move(A,[_,_,_,_,_,Scream]) :-
      retractall(wumpus(_,_)),
      retractall(stench(_,_))).
 
-/*
-checkSafe([Confounded,Stench,Tingle,Glitter,Bump,Scream]) :-
-	Stench :- 
-*/
+checkVerySafe([_,Stench,Tingle,_,_,_]) :-
+	 Stench == off,
+	 Tingle == off,
+	 current(X,Y,_),
+	 markAdjacentSafe(X,Y).
+
+markAdjacentSafe(X,Y) :-
+	N is Y + 1,
+	S is Y - 1,
+	E is X + 1,
+	W is X - 1,
+	assertz(safe(X,N)), (retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
+	assertz(safe(X,S)),	(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
+	assertz(safe(E,Y)),	(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
+	assertz(safe(W,Y)), (retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true).
+
 /*explore(L) :-
 	current(X,Y,_),
 	NewY is Y + 1,
