@@ -45,7 +45,9 @@ check_equal(A,B) :-
        hasarrow/0,
        dead/1,
        hascoin/1,
-       shootArrow/0
+       shootArrow/0,
+       markWumpusIfSuspicious/2,
+       locationFound/1
 ]).
 
 hasarrow :-
@@ -60,7 +62,9 @@ reborn :-
 	retractall(stench(_,_)),retractall(tingle(_,_)),
 	retractall(glitter(_,_)),retractall(wall(_,_)),
 	retractall(visited(_,_)),assertz(visited(0,0)),
-	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
+	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
+	retractall(safe(_,_)), assertz(safe(0,0)),
+	retractall(locationFound(_)).
 
 /* reposition:
 The Agent is randomly relocated to a safe location in the Wumpus World.
@@ -125,6 +129,41 @@ advance :-
 	assertz(current(NewX,Y,D)),
 	assertz(visited(NewX,Y)).
 
+
+confirmNoWumpus(X,Y) :-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	(( visited(X, N),\+stench(X,N));
+	( visited(X, S),\+stench(X,S));
+	( visited(E, Y),\+stench(E,Y));
+	( visited(W, Y),\+stench(W,Y))).
+
+confirmNoPortal(X,Y) :-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	(( visited(X, N),\+tingle(X,N));
+	( visited(X, S),\+tingle(X,S));
+	( visited(E, Y),\+tingle(E,Y));
+	( visited(W, Y),\+tingle(W,Y))).
+
+
+
+markWumpusIfSuspicious(X,Y) :-
+	\+locationFound(wumpus), \+confirmNoWumpus(X,Y),
+	\+safe(X,Y),assertz(wumpus(X,Y))
+	,false.
+
+markPortalIfSuspicious(X,Y) :-
+	\+confirmNoPortal(X,Y) , \+safe(X,Y) ,
+	assertz(confundus(X,Y))
+	,false.
+
+
+
 checkStench(STENCH) :-
 	STENCH == on,
 	current(X,Y,_),
@@ -133,19 +172,13 @@ checkStench(STENCH) :-
 	S is Y - 1, %bottom
 	E is X + 1, %right
 	W is X - 1, %left
-	(      \+visited(W,Y),assertz(wumpus(W,Y))) ,
-	       %checkSuspiciousStench(W,Y), %left
+	(
+	markWumpusIfSuspicious(W,Y); %left
+	markWumpusIfSuspicious(E,Y); %right
+	markWumpusIfSuspicious(X,N); %top
+	markWumpusIfSuspicious(X,S) %bottom
+	).
 
-	(      \+visited(E,Y),assertz(wumpus(E,Y)))  ,
-	       %checkSuspiciousStench(E,Y), %right
-
-
-	(      \+visited(X,N),assertz(wumpus(X,N)))  ,
-	        %checkSuspiciousStench(X,N),%top
-
-
-	(      \+visited(X,S), assertz(wumpus(X,S))).
-	       %checkSuspiciousStench(X,S)). %bottom
 
 /*checkSuspiciousStench(X,Y) :-
 	N is Y + 1, %top
@@ -170,10 +203,15 @@ checkTingle(TINGLE) :-
 	S is Y - 1, %bottom
 	E is X + 1, %right
 	W is X - 1, %left
-	assertz(confundus(W,Y)), %left
-	assertz(confundus(E,Y)), %right
-	assertz(confundus(X,N)), %top
-	assertz(confundus(X,S)). %bottom
+	(
+        (retractall(confundus(X,Y)) , false);
+	markPortalIfSuspicious(W,Y); %left
+	markPortalIfSuspicious(E,Y); %right
+	markPortalIfSuspicious(X,N); %top
+	markPortalIfSuspicious(X,S) %bottom
+	).
+
+
 
 checkGlitter(GLITTER) :-
 	GLITTER == on,
@@ -185,9 +223,6 @@ pickup:-
 	assertz(hascoin(agent)),
 	retractall(glitter(_,_)).
 
-move(turnright,[_,_,_,_,_,_]) :-
-	current(X,Y,D),
-	handleTurnRight(X,Y,D).
 
 handleTurnRight(A,B,D) :-
 	D == rnorth,
@@ -208,43 +243,51 @@ handleTurnRight(A,B,D) :-
 	D == rwest,
 	retractall(current(_,_,_)),
 	assertz(current(A,B,rnorth)).
+
+
+handleTurnLeft(A,B,D) :-
+	D == rnorth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rwest)).
+
+handleTurnLeft(A,B,D) :-
+	D == rwest,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rsouth)).
+
+handleTurnLeft(A,B,D) :-
+	D == rsouth,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,reast)).
+
+handleTurnLeft(A,B,D) :-
+	D == reast,
+	retractall(current(_,_,_)),
+	assertz(current(A,B,rnorth)).
+
 
 move(turnleft,[_,_,_,_,_,_]) :-
 	current(X,Y,D),
 	handleTurnLeft(X,Y,D).
 
-handleTurnLeft(A,B,D) :-
-	D == rnorth,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rwest)).
-
-handleTurnLeft(A,B,D) :-
-	D == rwest,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rsouth)).
-
-handleTurnLeft(A,B,D) :-
-	D == rsouth,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,reast)).
-
-handleTurnLeft(A,B,D) :-
-	D == reast,
-	retractall(current(_,_,_)),
-	assertz(current(A,B,rnorth)).
-
-
-
+move(turnright,[_,_,_,_,_,_]) :-
+	current(X,Y,D),
+	handleTurnRight(X,Y,D).
 
 
 move(A,[Confounded,Stench,Tingle,Glitter,Bump,_]) :-
 	A == moveforward,
 	Bump == off,
 	advance,
-	checkStench(Stench),
-        checkConfounded(Confounded),
-	checkTingle(Tingle),
-        checkGlitter(Glitter).
+	current(X,Y,_),
+	assertz(safe(X,Y)),
+	(
+		(checkVerySafe([Confounded,Stench,Tingle,Glitter,Bump,_]) , false);
+		(checkStench(Stench) , false);
+		(checkConfounded(Confounded) , false);
+		(checkTingle(Tingle) , false);
+		(checkGlitter(Glitter) , false)
+	).
 
 move(A,[_,_,_,_,Bump,_]) :-
 	A == moveforward,
@@ -289,12 +332,31 @@ move(A,[_,_,_,_,_,Scream]) :-
      retractall(wumpus(_,_)),
      retractall(stench(_,_))).
 
+checkVerySafe([_,Stench,Tingle,_,_,_]) :-
+	 Stench == off,
+	 Tingle == off,
+	 current(X,Y,_),
+	 markAdjacentSafe(X,Y),
+	 (retractall(confundus(X,Y)) ; true),
+	 (retractall(wumpus(X,Y)) ; true).
+
+markAdjacentSafe(X,Y) :-
+	N is Y + 1,
+	S is Y - 1,
+	E is X + 1,
+	W is X - 1,
+	assertz(safe(X,N)), (retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
+	assertz(safe(X,S)),	(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
+	assertz(safe(E,Y)),	(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
+	assertz(safe(W,Y)), (retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
+	findWumpus.
 
 
-safe(X,Y) :-
-(	\+wumpus(X,Y),
-	\+confundus(X,Y)) ;
-         visited(X,Y).
+
+findWumpus :-
+	aggregate_all(count, wumpus(_,_), WumpusCount),
+	WumpusCount == 1,
+	assertz(locationFound(wumpus)).
 
 
 /*explore(L) :-

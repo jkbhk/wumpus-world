@@ -46,8 +46,8 @@ check_equal(A,B) :-
        dead/1,
        hascoin/1,
        shootArrow/0,
-	   markWumpusIfSuspicious/2,
-	   locationFound/1
+       markWumpusIfSuspicious/2,
+       locationFound/1
 ]).
 
 hasarrow :-
@@ -133,17 +133,36 @@ advance :-
 confirmNoWumpus(X,Y) :-
 	N is Y + 1, %top
 	S is Y - 1, %bottom
-    E is X + 1, %right
+	E is X + 1, %right
 	W is X - 1, %left
 	(( visited(X, N),\+stench(X,N));
 	( visited(X, S),\+stench(X,S));
 	( visited(E, Y),\+stench(E,Y));
 	( visited(W, Y),\+stench(W,Y))).
-	
+
+confirmNoPortal(X,Y) :-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	(( visited(X, N),\+tingle(X,N));
+	( visited(X, S),\+tingle(X,S));
+	( visited(E, Y),\+tingle(E,Y));
+	( visited(W, Y),\+tingle(W,Y))).
+
+
 
 markWumpusIfSuspicious(X,Y) :-
-	\+locationFound(wumpus), \+confirmNoWumpus(X,Y), assertz(wumpus(X,Y))
+	\+locationFound(wumpus), \+confirmNoWumpus(X,Y),
+	\+safe(X,Y),assertz(wumpus(X,Y))
 	,false.
+
+markPortalIfSuspicious(X,Y) :-
+	\+confirmNoPortal(X,Y) , \+safe(X,Y) ,
+	assertz(confundus(X,Y))
+	,false.
+
+
 
 checkStench(STENCH) :-
 	STENCH == on,
@@ -184,10 +203,15 @@ checkTingle(TINGLE) :-
 	S is Y - 1, %bottom
 	E is X + 1, %right
 	W is X - 1, %left
-	assertz(confundus(W,Y)), %left
-	assertz(confundus(E,Y)), %right
-	assertz(confundus(X,N)), %top
-	assertz(confundus(X,S)). %bottom
+	(
+        (retractall(confundus(X,Y)) , false);
+	markPortalIfSuspicious(W,Y); %left
+	markPortalIfSuspicious(E,Y); %right
+	markPortalIfSuspicious(X,N); %top
+	markPortalIfSuspicious(X,S) %bottom
+	).
+
+
 
 checkGlitter(GLITTER) :-
 	GLITTER == on,
@@ -312,7 +336,10 @@ checkVerySafe([_,Stench,Tingle,_,_,_]) :-
 	 Stench == off,
 	 Tingle == off,
 	 current(X,Y,_),
+	 (retractall(confundus(X,Y)) ; true),
+	 (retractall(wumpus(X,Y)) ; true),
 	 markAdjacentSafe(X,Y).
+
 
 markAdjacentSafe(X,Y) :-
 	N is Y + 1,
@@ -328,7 +355,7 @@ markAdjacentSafe(X,Y) :-
 
 
 findWumpus :-
-	aggregate_all(count, wumpus(_,_), WumpusCount), 
+	aggregate_all(count, wumpus(_,_), WumpusCount),
 	WumpusCount == 1,
 	assertz(locationFound(wumpus)).
 
