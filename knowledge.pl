@@ -37,7 +37,8 @@ reborn :-
 	retractall(visited(_,_)),assertz(visited(0,0)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
 	retractall(safe(_,_)), assertz(safe(0,0)),
-	retractall(locationFound(_)).
+	retractall(locationFound(_))
+	retractall(safeToBacktrack(_,_)).
 
 
 reposition([_,_,_,_,_,_]) :-
@@ -338,7 +339,7 @@ stepsForSafeCell(X,Y,D,L):-
 	E is X + 1, %right
 	W is X - 1, %left
 	(
-		%% Backtrack
+		%% Dont walk into portal/wumpus
 
 				(
 			(wumpus(X,N);confundus(X,N)),
@@ -372,7 +373,7 @@ stepsForSafeCell(X,Y,D,L):-
 		);
 
 
-
+			 %%explore new places if no wumpus and no portal
 
 
 
@@ -411,6 +412,56 @@ stepsForSafeCell(X,Y,D,L):-
 				(D == rsouth, L = [turnright, moveforward]);
 				(D == rwest, L = [moveforward])
 			)
+		);
+
+		%% backtrack to safe places when no more other moves to try
+
+			 (
+			(safeToBacktrack(X,N)),
+			(
+				(D == rnorth, L = [tmoveforward]);
+				(D == reast, L = [turnleft, moveforward]);
+				(D == rsouth, L = [turnright,turnright, moveforward]);
+				(D == rwest, L = [turnright,moveforward])
+
+			)
+		);
+		(
+			(safeToBacktrack(X,S)),
+			(
+				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				(D == reast, L = [turnright, moveforward]);
+				(D == rsouth, L = [moveforward]);
+				(D == rwest, L = [turnleft,moveforward])
+
+
+			)
+		);
+		(
+			(safeToBacktrack(E,Y)),
+			(
+
+			      (D == rnorth, L = [turnright,moveforward]);
+				(D == reast, L = [moveforward]);
+				(D == rsouth, L = [turnleft, moveforward]);
+				(D == rwest, L = [turnleft,turnleft,moveforward])
+
+
+
+			)
+		);
+		(
+			(safeToBacktrack(W,Y)),
+			(
+
+			      (D == rnorth, L = [turnleft,moveforward]);
+				(D == reast, L = [turnright,turnright, moveforward]);
+				(D == rsouth, L = [turnright, moveforward]);
+				(D == rwest, L = [moveforward])
+
+
+
+			 )
 		)
 
 	).
