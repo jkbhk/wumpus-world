@@ -381,38 +381,32 @@ stepsForSafeCell(X,Y,D,L):-
 				(
 			(wumpus(X,N);confundus(X,N)),\+wall(X,N),safeToBacktrack(X,N),
 			(
-				(D == rnorth, L = [moveforward]);
-				(D == reast, L = [turnleft, moveforward]);
-				(D == rsouth, L = [turnright, turnright, moveforward]);
-				(D == rwest, L = [turnright, moveforward])
+				(L = [turnleft,turnleft,moveforward])
+
 			)
 		);
 		(
 			(wumpus(X,S);confundus(X,S)),\+wall(X,S),safeToBacktrack(X,S),
 			(
-				(D == rnorth, L = [turnleft,turnleft,moveforward]);
-				(D == reast, L = [turnright, moveforward]);
-				(D == rsouth, L = [moveforward]);
-				(D == rwest, L = [turnleft, moveforward])
+			       (L = [turnleft,turnleft,moveforward])
+
 			)
 		);
 		(
 			(wumpus(E,Y);confundus(E,Y)),\+wall(E,Y),safeToBacktrack(E,Y),
 			(
-				(D == rnorth, L = [turnright,moveforward]);
-				(D == reast, L = [moveforward]);
-				(D == rsouth, L = [turnleft, moveforward]);
-				(D == rwest, L = [turnleft,turnleft, moveforward])
+
+			      (L = [turnleft,turnleft,moveforward])
+
 			)
 		);
 		(
 			(wumpus(W,Y);confundus(W,Y)),\+wall(W,Y),safeToBacktrack(W,Y),
 			(
-				(D == rnorth, L = [turnleft,moveforward]);
-				(D == reast, L = [turnright,turnright, moveforward]);
-				(D == rsouth, L = [turnright, moveforward]);
-				(D == rwest, L = [moveforward])
-			)
+
+				(L = [turnleft,turnleft,moveforward])
+
+			 )
 		)
 	).
 
