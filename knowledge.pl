@@ -19,11 +19,9 @@
        markWumpusIfSuspicious/2,
        locationFound/1,
        uncollectedCoins/1,
-	   experimental/3,
-	   edge/4,
-	   safeEdge/4,
-	   hasSafePath/4,
-	   tried/3
+       tried/3,
+       safeToBacktrack/2
+
 ]).
 
 hasarrow :-
@@ -62,7 +60,6 @@ reposition([_,_,_,_,_,_]) :-
 % wall: if i move and hit a wall, receive a bump
 
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
-
 clearData(X,Y) :-
 	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),
 	retract(confundus(X,Y));
@@ -72,6 +69,7 @@ clearData(X,Y) :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rnorth,
         NewY is Y + 1,
 	retractall(current(_,_,_)),
@@ -80,6 +78,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rsouth,
 	NewY is Y - 1,
 	retractall(current(_,_,_)),
@@ -88,6 +87,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == reast,
 	NewX is X + 1,
 	retractall(current(_,_,_)),
@@ -96,6 +96,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rwest,
 	NewX is X - 1,
 	retractall(current(_,_,_)),
@@ -311,14 +312,11 @@ markAdjacentSafe(X,Y) :-
 	S is Y - 1,
 	E is X + 1,
 	W is X - 1,
-	assertz(safe(X,N)), assertz(edge(X,Y,X,N)) ,(retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
-	assertz(safe(X,S)),	assertz(edge(X,Y,X,S)) ,(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
-	assertz(safe(E,Y)),	assertz(edge(X,Y,E,Y)) ,(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
-	assertz(safe(W,Y)), assertz(edge(X,Y,W,Y)) ,(retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
+	assertz(safe(X,N)), (retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
+	assertz(safe(X,S)), (retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
+	assertz(safe(E,Y)), (retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
+	assertz(safe(W,Y)),(retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
 	findWumpus.
-
-safeEdge(X,Y,A,B) :-
-	edge(X,Y,A,B) ; edge(A,B,X,Y).
 
 findWumpus :-
 	aggregate_all(count, wumpus(_,_), WumpusCount),
@@ -327,7 +325,7 @@ findWumpus :-
 
 
 
-	
+
 
 % case 1: no inferred safe edge
 % case 2: got iferred sage edge
@@ -356,7 +354,7 @@ stepsForSafeCell(X,Y,D,L):-
 				(D == reast, L = [turnright, moveforward]);
 				(D == rsouth, L = [moveforward]);
 				(D == rwest, L = [turnleft, moveforward])
-			) 
+			)
 		);
 		(
 			(\+wumpus(E,Y);\+confundus(E,Y)),\+wall(E,Y),\+visited(E,Y),
@@ -365,10 +363,50 @@ stepsForSafeCell(X,Y,D,L):-
 				(D == reast, L = [moveforward]);
 				(D == rsouth, L = [turnleft, moveforward]);
 				(D == rwest, L = [turnleft,turnleft, moveforward])
-			) 
+			)
 		);
 		(
 			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),\+visited(W,Y),
+			(
+				(D == rnorth, L = [turnleft,moveforward]);
+				(D == reast, L = [turnright,turnright, moveforward]);
+				(D == rsouth, L = [turnright, moveforward]);
+				(D == rwest, L = [moveforward])
+			)
+		);
+
+
+		%% Backtrack
+
+				(
+			(\+wumpus(X,N);\+confundus(X,N)),\+wall(X,N),safeToBackTrack(X,N),
+			(
+				(D == rnorth, L = [moveforward]);
+				(D == reast, L = [turnleft, moveforward]);
+				(D == rsouth, L = [turnright, turnright, moveforward]);
+				(D == rwest, L = [turnright, moveforward])
+			)
+		);
+		(
+			(\+wumpus(X,S);\+confundus(X,S)),\+wall(X,S),safeToBackTrack(X,S),
+			(
+				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				(D == reast, L = [turnright, moveforward]);
+				(D == rsouth, L = [moveforward]);
+				(D == rwest, L = [turnleft, moveforward])
+			)
+		);
+		(
+			(\+wumpus(E,Y);\+confundus(E,Y)),\+wall(E,Y),safeToBackTrack(E,Y),
+			(
+				(D == rnorth, L = [turnright,moveforward]);
+				(D == reast, L = [moveforward]);
+				(D == rsouth, L = [turnleft, moveforward]);
+				(D == rwest, L = [turnleft,turnleft, moveforward])
+			)
+		);
+		(
+			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),safeToBackTrack(W,Y),
 			(
 				(D == rnorth, L = [turnleft,moveforward]);
 				(D == reast, L = [turnright,turnright, moveforward]);
@@ -386,7 +424,7 @@ explore(L):-
 		%( stench(X,Y), stepsForStenchCell(X,Y,D,L) );
 		%( tingle(X,Y), stepsForTingleCell(X,Y,D,L) );
 		( stepsForSafeCell(X,Y,D,L) )
-		
+
 	).
 
 
@@ -397,7 +435,7 @@ isEmptyCell(X,Y) :-
 	safe(X,Y).
 /*
 findNextSafe([]).
-findNextSafe(X, [_|T]) :- 
+findNextSafe(X, [_|T]) :-
 	findNextSafe(X,T).
 
 hasSafePath(X,Y,X,Y):-
@@ -423,8 +461,8 @@ adj(X,Y,C,D) :-
 	(pos(Y,D) , X == C , experimental(_,_,F),turnUntil(F,rsouth),fakeMove,assertz(explore(moveforward))); % go down(south)
 	(neg(X,C) , Y == D , experimental(_,_,F),turnUntil(F,reast),fakeMove,assertz(explore(moveforward))); % go right(east)
 	(neg(Y,D) , X == C , experimental(_,_,F),turnUntil(F,rnorth),fakeMove,assertz(explore(moveforward))); % go up (north)
-	
-	
+
+
 turnUntil(D,D).
 turnUntil(D,T):-
 	D \== T,
@@ -442,7 +480,7 @@ fakeTurn :-
 		(D == rwest , retractAll(experimental(_,_,_)), assertz(experimental(X,Y,rnorth)));
 	).
 
-fakeMove :- 
+fakeMove :-
 	experimental(X,Y,D),
 	(
 		(D == rnorth , retractAll(experimental(_,_,_)), NewY is Y+1, assertz(experimental(X,NewY,D)));

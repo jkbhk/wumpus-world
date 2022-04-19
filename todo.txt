@@ -1,6 +1,4 @@
 explore
-integrate
-retract wumpusCount when encounter wall
 
 issues found:
 agent went missing after stepping into confundus??
