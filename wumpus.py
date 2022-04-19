@@ -545,7 +545,7 @@ def setupWorld():
     setWalls()
     for i in range(3):
         spawnConfundus()
-    #spawnWumpus()
+    spawnWumpus()
     spawnCoin()
     spawnAgent()
     resetAgent()
