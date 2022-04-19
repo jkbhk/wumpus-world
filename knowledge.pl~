@@ -19,7 +19,8 @@
        markWumpusIfSuspicious/2,
        locationFound/1,
        uncollectedCoins/1,
-       tried/3
+       tried/3,
+       safeToBacktrack/2
 
 ]).
 
@@ -59,7 +60,6 @@ reposition([_,_,_,_,_,_]) :-
 % wall: if i move and hit a wall, receive a bump
 
 % Confounded - Stench - Tingle - Glitter - Bump - Scream
-
 clearData(X,Y) :-
 	wumpus(X,Y), confundus(X,Y) -> retract(wumpus(X,Y)),
 	retract(confundus(X,Y));
@@ -69,6 +69,7 @@ clearData(X,Y) :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rnorth,
         NewY is Y + 1,
 	retractall(current(_,_,_)),
@@ -77,6 +78,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rsouth,
 	NewY is Y - 1,
 	retractall(current(_,_,_)),
@@ -85,6 +87,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == reast,
 	NewX is X + 1,
 	retractall(current(_,_,_)),
@@ -93,6 +96,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
+	assertz(safeToBackTrack(X,Y)),
 	D == rwest,
 	NewX is X - 1,
 	retractall(current(_,_,_)),
@@ -363,6 +367,46 @@ stepsForSafeCell(X,Y,D,L):-
 		);
 		(
 			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),\+visited(W,Y),
+			(
+				(D == rnorth, L = [turnleft,moveforward]);
+				(D == reast, L = [turnright,turnright, moveforward]);
+				(D == rsouth, L = [turnright, moveforward]);
+				(D == rwest, L = [moveforward])
+			)
+		);
+
+
+		%% Backtrack
+
+				(
+			(\+wumpus(X,N);\+confundus(X,N)),\+wall(X,N),safeToBackTrack(X,N),
+			(
+				(D == rnorth, L = [moveforward]);
+				(D == reast, L = [turnleft, moveforward]);
+				(D == rsouth, L = [turnright, turnright, moveforward]);
+				(D == rwest, L = [turnright, moveforward])
+			)
+		);
+		(
+			(\+wumpus(X,S);\+confundus(X,S)),\+wall(X,S),safeToBackTrack(X,S),
+			(
+				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				(D == reast, L = [turnright, moveforward]);
+				(D == rsouth, L = [moveforward]);
+				(D == rwest, L = [turnleft, moveforward])
+			)
+		);
+		(
+			(\+wumpus(E,Y);\+confundus(E,Y)),\+wall(E,Y),safeToBackTrack(E,Y),
+			(
+				(D == rnorth, L = [turnright,moveforward]);
+				(D == reast, L = [moveforward]);
+				(D == rsouth, L = [turnleft, moveforward]);
+				(D == rwest, L = [turnleft,turnleft, moveforward])
+			)
+		);
+		(
+			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),safeToBackTrack(W,Y),
 			(
 				(D == rnorth, L = [turnleft,moveforward]);
 				(D == reast, L = [turnright,turnright, moveforward]);
