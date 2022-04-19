@@ -69,7 +69,7 @@ clearData(X,Y) :-
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBackTrack(X,Y)),
+	assertz(safeToBacktrack(X,Y)),
 	D == rnorth,
         NewY is Y + 1,
 	retractall(current(_,_,_)),
@@ -78,7 +78,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBackTrack(X,Y)),
+	assertz(safeToBacktrack(X,Y)),
 	D == rsouth,
 	NewY is Y - 1,
 	retractall(current(_,_,_)),
@@ -87,7 +87,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBackTrack(X,Y)),
+	assertz(safeToBacktrack(X,Y)),
 	D == reast,
 	NewX is X + 1,
 	retractall(current(_,_,_)),
@@ -96,7 +96,7 @@ advance :-
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBackTrack(X,Y)),
+	assertz(safeToBacktrack(X,Y)),
 	D == rwest,
 	NewX is X - 1,
 	retractall(current(_,_,_)),
@@ -379,7 +379,7 @@ stepsForSafeCell(X,Y,D,L):-
 		%% Backtrack
 
 				(
-			(\+wumpus(X,N);\+confundus(X,N)),\+wall(X,N),safeToBacktrack(X,N),
+			(wumpus(X,N);confundus(X,N)),\+wall(X,N),safeToBacktrack(X,N),
 			(
 				(D == rnorth, L = [moveforward]);
 				(D == reast, L = [turnleft, moveforward]);
@@ -388,7 +388,7 @@ stepsForSafeCell(X,Y,D,L):-
 			)
 		);
 		(
-			(\+wumpus(X,S);\+confundus(X,S)),\+wall(X,S),safeToBacktrack(X,S),
+			(wumpus(X,S);confundus(X,S)),\+wall(X,S),safeToBacktrack(X,S),
 			(
 				(D == rnorth, L = [turnleft,turnleft,moveforward]);
 				(D == reast, L = [turnright, moveforward]);
@@ -397,7 +397,7 @@ stepsForSafeCell(X,Y,D,L):-
 			)
 		);
 		(
-			(\+wumpus(E,Y);\+confundus(E,Y)),\+wall(E,Y),safeToBacktrack(E,Y),
+			(wumpus(E,Y);confundus(E,Y)),\+wall(E,Y),safeToBacktrack(E,Y),
 			(
 				(D == rnorth, L = [turnright,moveforward]);
 				(D == reast, L = [moveforward]);
@@ -406,7 +406,7 @@ stepsForSafeCell(X,Y,D,L):-
 			)
 		);
 		(
-			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),safeToBacktrack(W,Y),
+			(wumpus(W,Y);confundus(W,Y)),\+wall(W,Y),safeToBacktrack(W,Y),
 			(
 				(D == rnorth, L = [turnleft,moveforward]);
 				(D == reast, L = [turnright,turnright, moveforward]);
