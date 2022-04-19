@@ -113,9 +113,15 @@ def displayRelativeGrid():
         coord = getCoordForRelativeCell(i)
         x = coord[0]
         y = coord[1]
-        agentRelativePos = (list(prolog.query("current(X,Y,D)"))[0].get('X') , list(prolog.query("current(X,Y,D)"))[0].get('Y'))
-        #agentRelativePos = (list(prolog.query("current(X,Y,D)"))[0].get('X'),list(prolog.query("current(X,Y,D)"))[0].get('Y'))
 
+        if bool(list(prolog.query("wall({},{})".format(x,y)))) is True:
+            for j in range(len(grid[i])):
+                grid[i][j] = "#"
+
+            continue
+
+        agentRelativePos = (list(prolog.query("current(X,Y,D)"))[0].get('X') , list(prolog.query("current(X,Y,D)"))[0].get('Y'))
+    
         grid[i][0] = "%" if bool(list(prolog.query("confundus({},{})".format(x,y)))) else "."
         grid[i][1] = '=' if bool(list(prolog.query("stench({},{})".format(x,y)))) else "."
         grid[i][2] = "T" if bool(list(prolog.query("tingle({},{})".format(x,y)))) else "."
@@ -380,10 +386,15 @@ def handleInput(input):
     global gameOver
     
     if input == "1":
-        temp = list(prolog.query("explore(L)"))
-        a = temp[0].get('L')
-        print("L: ", a)
-        handleAction(a[0])
+        if bool(list(prolog.query("explore(L)"))) is True:
+            temp = list(prolog.query("explore(L)"))
+            actions = temp[0].get('L')
+            for a in actions:
+                print("agent smith: ", a)
+                handleAction(a)
+        else:
+            print("no available safe actions.")
+            gameOver = True
     if input == "2":
             grabCoin()
             sense()
@@ -532,8 +543,8 @@ def resetAgent():
 def setupWorld():
     initializeCellData()
     setWalls()
-    #for i in range(3):
-    #    spawnConfundus()
+    for i in range(3):
+        spawnConfundus()
     #spawnWumpus()
     spawnCoin()
     spawnAgent()

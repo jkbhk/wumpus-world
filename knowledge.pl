@@ -341,9 +341,8 @@ stepsForSafeCell(X,Y,D,L):-
 	W is X - 1, %left
 	(
 		(
-			(\+wumpus(X,N);\+confundus(X,N)),
+			(\+wumpus(X,N);\+confundus(X,N)),\+wall(X,N),\+visited(X,N),
 			(
-				write('top'),
 				(D == rnorth, L = [moveforward]);
 				(D == reast, L = [turnleft, moveforward]);
 				(D == rsouth, L = [turnright, turnright, moveforward]);
@@ -351,9 +350,8 @@ stepsForSafeCell(X,Y,D,L):-
 			)
 		);
 		(
-			(\+wumpus(X,S);\+confundus(X,S)),
+			(\+wumpus(X,S);\+confundus(X,S)),\+wall(X,S),\+visited(X,S),
 			(
-				write('btm'),
 				(D == rnorth, L = [turnleft,turnleft,moveforward]);
 				(D == reast, L = [turnright, moveforward]);
 				(D == rsouth, L = [moveforward]);
@@ -361,9 +359,8 @@ stepsForSafeCell(X,Y,D,L):-
 			) 
 		);
 		(
-			(\+wumpus(E,Y);\+confundus(E,Y)),
+			(\+wumpus(E,Y);\+confundus(E,Y)),\+wall(E,Y),\+visited(E,Y),
 			(
-				write('right'),
 				(D == rnorth, L = [turnright,moveforward]);
 				(D == reast, L = [moveforward]);
 				(D == rsouth, L = [turnleft, moveforward]);
@@ -371,9 +368,8 @@ stepsForSafeCell(X,Y,D,L):-
 			) 
 		);
 		(
-			(\+wumpus(W,Y);\+confundus(W,Y)),
+			(\+wumpus(W,Y);\+confundus(W,Y)),\+wall(W,Y),\+visited(W,Y),
 			(
-				write('left'),
 				(D == rnorth, L = [turnleft,moveforward]);
 				(D == reast, L = [turnright,turnright, moveforward]);
 				(D == rsouth, L = [turnright, moveforward]);
@@ -390,6 +386,7 @@ explore(L):-
 		%( stench(X,Y), stepsForStenchCell(X,Y,D,L) );
 		%( tingle(X,Y), stepsForTingleCell(X,Y,D,L) );
 		( stepsForSafeCell(X,Y,D,L) )
+		
 	).
 
 
