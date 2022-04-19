@@ -20,7 +20,8 @@
        locationFound/1,
        uncollectedCoins/1,
        tried/3,
-       safeToBacktrack/2
+       safeToBacktrack/2,
+	   gohome/2
 
 ]).
 
@@ -37,7 +38,7 @@ reborn :-
 	retractall(visited(_,_)),assertz(visited(0,0)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
 	retractall(safe(_,_)), assertz(safe(0,0)),
-	retractall(locationFound(_))
+	retractall(locationFound(_)),
 	retractall(safeToBacktrack(_,_)).
 
 
