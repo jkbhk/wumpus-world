@@ -1,9 +1,5 @@
-
-from cgitb import reset
-from code import interact
 from math import floor
 import random
-from webbrowser import Grail
 from pyswip import Prolog
 prolog = Prolog()
 prolog.consult("knowledge.pl")
@@ -32,7 +28,7 @@ GRID_X = 7
 GRID_Y = 6
 CONTENT_SIZE = 3
 
-relativeSize = 3
+relativeSize = 1
 
 directions = ["north","east","south","west"]
 # orientation is the index of directions
@@ -102,11 +98,9 @@ def displayRelativeGrid():
     global relativeSize
 
     visited = list(prolog.query("visited(X,Y)"))
-    print("agent visited:")
     for coord in visited:
         x = coord.get('X')
         y = coord.get('Y')
-        print("{},{}".format(x,y))
         if abs(x) > (relativeSize-1)/2 or abs(y) > (relativeSize-1)/2:
             relativeSize+=2
             return displayRelativeGrid()
@@ -128,13 +122,7 @@ def displayRelativeGrid():
         grid[i][3] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
 
         temp = " "
-        if bool(list(prolog.query("wumpus({},{})".format(x,y)))) and bool(list(prolog.query("confundus({},{})".format(x,y)))):
-            temp = "U"
-        elif bool(list(prolog.query("wumpus({},{})".format(x,y)))):
-            temp = "W"
-        elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
-            temp = "O"
-        elif len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
+        if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0:
             direction = list(prolog.query("current({},{},D)".format(x,y)))[0].get('D')
             if direction == "rnorth":
                 direction = "^"
@@ -146,6 +134,12 @@ def displayRelativeGrid():
                 direction = "<"
 
             temp = direction
+        elif bool(list(prolog.query("wumpus({},{})".format(x,y)))) and bool(list(prolog.query("confundus({},{})".format(x,y)))):
+            temp = "U"
+        elif bool(list(prolog.query("wumpus({},{})".format(x,y)))):
+            temp = "W"
+        elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
+            temp = "O"
         elif bool(list(prolog.query("safe({},{})".format(x,y)))) and not bool(list(prolog.query("visited({},{})".format(x,y)))):
             temp = "s"
         elif bool(list(prolog.query("safe({},{})".format(x,y)))) and bool(list(prolog.query("visited({},{})".format(x,y)))):
@@ -159,50 +153,6 @@ def displayRelativeGrid():
         grid[i][7] = 'B' if currentSenses[4] == "on" and x == agentRelativePos[0] and y == agentRelativePos[1] else "."
         grid[i][8] = '@' if currentSenses[5] == "on" and x == agentRelativePos[0] and y == agentRelativePos[1] else "."
 
-
-
-    # for coord in visited:
-    #     x = coord.get('X')
-    #     y = coord.get('Y')
-    #     target = int(origin) + x - (y * relativeSize)
-
-    #     # querying kb for each symbol
-    #     grid[target][0] = "%" if bool(list(prolog.query("confundus({},{})".format(x,y)))) else "."
-    #     grid[target][1] = '=' if bool(list(prolog.query("stench({},{})".format(x,y)))) else "."
-    #     grid[target][2] = "T" if bool(list(prolog.query("tingle({},{})".format(x,y)))) else "."
-    #     grid[target][3] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
-
-    #     temp = " "
-    #     if bool(list(prolog.query("wumpus({},{})".format(x,y)))) and bool(list(prolog.query("confundus({},{})".format(x,y)))):
-    #         temp = "U"
-    #     elif bool(list(prolog.query("wumpus({},{})".format(x,y)))):
-    #         temp = "W"
-    #     elif bool(list(prolog.query("confundus({},{})".format(x,y)))):
-    #         temp = "O"
-    #     elif len(list(prolog.query("current(X,Y,D)"))) > 0:
-    #         direction = list(prolog.query("current(X,Y,D)"))[0].get('D')
-    #         if direction == "rnorth":
-    #             direction = "^"
-    #         elif direction == "rsouth":
-    #             direction = "v"
-    #         elif direction == "reast":
-    #             direction = ">"
-    #         elif direction == "rwest":
-    #             direction = "<"
-
-    #         temp = direction
-    #     elif bool(list(prolog.query("safe({},{})".format(x,y)))) and not bool(list(prolog.query("visited({},{})".format(x,y)))):
-    #         temp = "s"
-    #     elif bool(list(prolog.query("safe({},{})".format(x,y)))) and bool(list(prolog.query("visited({},{})".format(x,y)))):
-    #         temp = "S"
-    #     else:
-    #         temp = "?"
-
-    #     grid[target][4] = temp
-    #     grid[target][5] = '-' if len(list(prolog.query("current({},{},D)".format(x,y)))) > 0 or bool(list(prolog.query("wumpus({},{})".format(x,y)))) else "."
-    #     grid[target][6] = '*' if bool(list(prolog.query("glitter({},{})".format(x,y)))) else "."
-    #     grid[target][7] = 'B' if currentSenses[4] == "on" else "."
-    #     grid[target][8] = '@' if currentSenses[5] == "on" else "."
 
     rgrid = ""
 
@@ -223,25 +173,47 @@ def printCoordsForRelativeGrid():
     # offset from center
     offset =  (((relativeSize-1)/2))
     # max x or y allowed
-    cutoff = (((relativeSize-1)/2)+offset)
+    #cutoff = (((relativeSize-1)/2)+offset)
+    cutoff = (relativeSize + 1 )/ 2
+
     for i in range(relativeSize * relativeSize):
-        print("x = ",  int((floor(i%relativeSize) + offset) % cutoff) * (-1 if (floor(i%relativeSize) + offset) < cutoff else 1 ))
-        print("y = ",  int((floor(i/relativeSize) + offset) % cutoff) * (-1 if (floor(i/relativeSize) + offset) > cutoff else 1 ))
+
+
+        # 00 10 20 30 40
+        # 01 11 21 31 41
+        # 02 12 22 32 42
+        # 03 13 23 33 43
+        # 04 14 24 34 44
+
+        x = int((floor(i%relativeSize) -offset)) 
+        y = int((floor(i/relativeSize) -offset)) * -1
+
+
+        print("x = ",  x)
+        print("y = ",  y)
         print()
 
 
-def getCoordForRelativeCell(i):
+def getCoordForRelativeCell2(i):
     # offset from center
     offset =  (((relativeSize-1)/2))
     # max x or y allowed
-    cutoff = (((relativeSize-1)/2)+offset)
+    #cutoff = (((relativeSize-1)/2)+offset)
+    cutoff = (relativeSize+1) / 2
 
     x = int((floor(i%relativeSize) + offset) % cutoff) * (-1 if (floor(i%relativeSize) + offset) < cutoff else 1 )
     y = int((floor(i/relativeSize) + offset) % cutoff) * (-1 if (floor(i/relativeSize) + offset) > cutoff else 1 )
 
     return (x,y)
 
+def getCoordForRelativeCell(i):
+    # offset from center
+    offset =  (((relativeSize-1)/2))
 
+    x = int((floor(i%relativeSize) - offset)) 
+    y = int((floor(i/relativeSize) - offset)) * -1
+
+    return (x,y)
 
 def getPointer(o):
     if o == "north":
@@ -293,12 +265,15 @@ def move():
         currentSenses[4] = "on"
     elif cells[currentCell][4] == "W":
         print("Agent killed by wumpus.")
-        print("Resetting world...")
+        print(bool(list(prolog.query("reborn"))))
+        relativeSize = 1
         setupWorld()
+        resetSenses()
     elif cells[currentCell][4] == "O":
         print("Stepped into portal.")
         print("teleporting...")
-        cells[prevCell][4] = prevNPC
+        cells[prevCell][4] = "O"
+        relativeSize = 1
         spawnAgent()
         resetSenses()
         sense()
@@ -345,7 +320,7 @@ def printSenses():
 
 def grabCoin():
     global cells
-
+    print(bool(list(prolog.query("move(pickup,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
     if cells[currentCell][6] == "*":
         cells[currentCell][6] = "."
 
@@ -391,41 +366,70 @@ def shoot():
         
         nextCell += fly
 
+def requestInput():
+    print("Enter input:")
+    print("1) explore(L)")
+    print("2) pickup")
+    print("3) moveforward")
+    print("4) turnleft")
+    print("5) turnright")
+    print("6) shoot")
 
 def handleInput(input):
     global orientation
     global gameOver
     
-    if input == "turn left":
-        turn(-1)
-        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+    if input == "1":
+        temp = list(prolog.query("explore(L)"))
+        a = temp[0].get('L')
+        print("L: ", a)
+        handleAction(a[0])
+    if input == "2":
+            grabCoin()
+            sense()
 
-    if input == "turn right":
-        turn(1)
-        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
-        
-    if input == "move":
+    if input == "3":
         move()
         print(bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
-    if input == "reborn":
-        print(bool(list(prolog.query("reborn"))))
+    if input == "4":
+        turn(-1)
+        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
-    if input == "m":
-        printCoordsForRelativeGrid()
+    if input == "5":
+        turn(1)
+        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+
+    if input == "6":
+        if bool(list(prolog.query("hasarrow"))) :
+            shoot()
+            print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+
 
     if input == "end":
         gameOver = True
 
-    if input == "shoot":
-        shoot()
-        print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
-
-    if input == "grab":
+def handleAction(a):
+    if a == "pickup":
         grabCoin()
         sense()
+    elif a == "moveforward":
+        move()
+        print(bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+    elif a == "turnleft":
+        turn(-1)
+        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+    elif a == "turnright":
+        turn(1)
+        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+    elif a == "shoot":
+        if bool(list(prolog.query("hasarrow"))) :
+            shoot()
+            print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
-    
+
+
+
 def initializeCellData():
 
     global cells
@@ -490,7 +494,7 @@ def spawnAgent():
     global currentCell
 
     x = random.randint(0,(GRID_X*GRID_Y )-1)
-    if cells[x][4] != 's':
+    if cells[x][4] != 's' or cells[x][2] != '.' or cells[x][1] != '.':
         spawnAgent()
     else:
         cells[x][4] = getPointer(directions[orientation])
@@ -519,6 +523,8 @@ def resetSenses():
     for i in range(len(currentSenses)):
         currentSenses[i] = "off"
 
+    currentSenses[0] = "on"
+
 def resetAgent():
     global orientation
     orientation = 0
@@ -526,9 +532,9 @@ def resetAgent():
 def setupWorld():
     initializeCellData()
     setWalls()
-    for i in range(3):
-        spawnConfundus()
-    spawnWumpus()
+    #for i in range(3):
+    #    spawnConfundus()
+    #spawnWumpus()
     spawnCoin()
     spawnAgent()
     resetAgent()
@@ -545,7 +551,8 @@ if __name__ == '__main__':
         print(currentSenses)
         printSenses()
 
-        temp = input("\ntest input: ")
+        requestInput()
+        temp = input()
         handleInput(temp)
         
 

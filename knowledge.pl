@@ -1,33 +1,3 @@
-say_hi :-
-	write('What is your name?'),
-	read(X),
-	write('Hi '),
-	write(X).
-
-check_equal(A,B) :-
-	A == B ->
-	write("A and B are equal") , nl,
-	write("hello") , !;
-
-	A >= B ->
-	write("A greater than B") ,!;
-
-	A < B ->
-	write("A lesser than B") ,! .
-
-/*:- abolish(visited/2).
-:- abolish(wumpus/2).
-:- abolish(confundus/2).
-:- abolish(tingle/2).
-:- abolish(glitter/2).
-:- abolish(stench/2).
-:- abolish(safe/2).
-:- abolish(wall/2).
-:- abolish(move/2).
-:- abolish(reposition/1).
-:- abolish(current/3).
-:- abolish(explore/1). */
-
 :- dynamic([
        visited/2,
        wumpus/2,
@@ -48,7 +18,12 @@ check_equal(A,B) :-
        shootArrow/0,
        markWumpusIfSuspicious/2,
        locationFound/1,
-       uncollectedCoins/1
+       uncollectedCoins/1,
+	   experimental/3,
+	   edge/4,
+	   safeEdge/4,
+	   hasSafePath/4,
+	   tried/3
 ]).
 
 hasarrow :-
@@ -66,13 +41,7 @@ reborn :-
 	retractall(safe(_,_)), assertz(safe(0,0)),
 	retractall(locationFound(_)).
 
-/* reposition:
-The Agent is randomly relocated to a safe location in the Wumpus World.
-The relative position is reset to (0,0) and relative orientation is
-reset to become the Relative North. All memory of previous steps and
-sensory readings is lost, except the fact of existence of uncollected
-coins, whether the Wumpus is alive and whether the Agent has the
-arrow.*/
+
 reposition([_,_,_,_,_,_]) :-
 	retractall(wumpus(_,_)),
 	retractall(confundus(_,_)), retractall(tingle(_,_)),
@@ -184,17 +153,6 @@ checkStench(STENCH) :-
 	).
 
 
-/*checkSuspiciousStench(X,Y) :-
-	N is Y + 1, %top
-	S is Y - 1, %bottom
-        E is X + 1, %right
-	W is X - 1, %left
-(	( not(( visited(X, N),\+stench(X,N))) ,retract(wumpus(X,Y))	);
-	( not((visited(X, S) ,\+stench(X,S))),retract(wumpus(X,Y))	);
-	( not((visited(E, Y) ,\+stench(E,Y))),retract(wumpus(X,Y))	);
-	( not((visited(W, Y) ,\+stench(W,Y))),retract(wumpus(X,Y)))	)	     . */
-
-
 checkConfounded([CONFOUNDED,_,_,_,_,_]) :-
 	CONFOUNDED == on,
 	reposition([CONFOUNDED,_,_,_,_,_]).
@@ -224,9 +182,9 @@ checkGlitter(GLITTER) :-
 	assertz(glitter(X,Y)).
 
 
-pickup:-
+pickup(X,Y) :-
 	assertz(hascoin(agent)),
-	retractall(glitter(_,_)).
+	retractall(glitter(X,Y)).
 
 
 handleTurnRight(A,B,D) :-
@@ -327,9 +285,10 @@ move(A,[_,_,_,_,Bump,_]) :-
 
 	).
 
-move(A,[_,_,_,_,_,_]) :-
-	A == pickup,
-	pickup.
+move(A,[_,_,_,Glitter,_,_]) :-
+	A == pickup, Glitter = on,
+	current(X,Y,_),
+	pickup(X,Y).
 
 move(A,[_,_,_,_,_,Scream]) :-
      A == shoot, hasarrow, assertz(shootArrow),
@@ -352,13 +311,14 @@ markAdjacentSafe(X,Y) :-
 	S is Y - 1,
 	E is X + 1,
 	W is X - 1,
-	assertz(safe(X,N)), (retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
-	assertz(safe(X,S)),	(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
-	assertz(safe(E,Y)),	(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
-	assertz(safe(W,Y)), (retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
+	assertz(safe(X,N)), assertz(edge(X,Y,X,N)) ,(retract(wumpus(X,N)) ; retract(confundus(X,N)) ; true),
+	assertz(safe(X,S)),	assertz(edge(X,Y,X,S)) ,(retract(wumpus(X,S)) ; retract(confundus(X,S)) ; true),
+	assertz(safe(E,Y)),	assertz(edge(X,Y,E,Y)) ,(retract(wumpus(E,Y)) ; retract(confundus(E,Y)) ; true),
+	assertz(safe(W,Y)), assertz(edge(X,Y,W,Y)) ,(retract(wumpus(W,Y)) ; retract(confundus(W,Y)) ; true),
 	findWumpus.
 
-
+safeEdge(X,Y,A,B) :-
+	edge(X,Y,A,B) ; edge(A,B,X,Y).
 
 findWumpus :-
 	aggregate_all(count, wumpus(_,_), WumpusCount),
@@ -366,26 +326,150 @@ findWumpus :-
 	assertz(locationFound(wumpus)).
 
 
-/*explore(L) :-
-	current(X,Y,_),
-	NewY is Y + 1,
-	safe(X,NewY),
-	L = moveforward;
 
-	current(X,Y,_),
-	NewY is Y - 1,
-	safe(X,NewY);
+	
 
-	current(X,Y,_),
-	NewX is X + 1,
-	safe(NewX,Y);
+% case 1: no inferred safe edge
+% case 2: got iferred sage edge
+% case 3: no unvisited safe edge
 
-	current(X,Y,_),
-	NewX is X - 1,
-	safe(NewX,Y),
 
-	explore(L).*/
+stepsForSafeCell(X,Y,D,L):-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	(
+		(
+			(\+wumpus(X,N);\+confundus(X,N)),
+			(
+				write('top'),
+				(D == rnorth, L = [moveforward]);
+				(D == reast, L = [turnleft, moveforward]);
+				(D == rsouth, L = [turnright, turnright, moveforward]);
+				(D == rwest, L = [turnright, moveforward])
+			)
+		);
+		(
+			(\+wumpus(X,S);\+confundus(X,S)),
+			(
+				write('btm'),
+				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				(D == reast, L = [turnright, moveforward]);
+				(D == rsouth, L = [moveforward]);
+				(D == rwest, L = [turnleft, moveforward])
+			) 
+		);
+		(
+			(\+wumpus(E,Y);\+confundus(E,Y)),
+			(
+				write('right'),
+				(D == rnorth, L = [turnright,moveforward]);
+				(D == reast, L = [moveforward]);
+				(D == rsouth, L = [turnleft, moveforward]);
+				(D == rwest, L = [turnleft,turnleft, moveforward])
+			) 
+		);
+		(
+			(\+wumpus(W,Y);\+confundus(W,Y)),
+			(
+				write('left'),
+				(D == rnorth, L = [turnleft,moveforward]);
+				(D == reast, L = [turnright,turnright, moveforward]);
+				(D == rsouth, L = [turnright, moveforward]);
+				(D == rwest, L = [moveforward])
+			)
+		)
+	).
 
+
+explore(L):-
+	current(X,Y,D),
+	(
+		( glitter(X,Y), L = [pickup] );
+		%( stench(X,Y), stepsForStenchCell(X,Y,D,L) );
+		%( tingle(X,Y), stepsForTingleCell(X,Y,D,L) );
+		( stepsForSafeCell(X,Y,D,L) )
+	).
+
+
+isEmptyCell(X,Y) :-
+	\+stench(X,Y),
+	\+tingle(X,Y),
+	\+glitter(X,Y),
+	safe(X,Y).
+/*
+findNextSafe([]).
+findNextSafe(X, [_|T]) :- 
+	findNextSafe(X,T).
+
+hasSafePath(X,Y,X,Y):-
+	same(X,Y,X,Y).
+hasSafePath(X,Y,A,B) :-
+	safeEdge(X,Y,C,D),
+	hasSafePath(C,D,A,B).
+
+same(X,Y,A,B) :-
+	X == A ; Y == B.
+
+safePath(X,Y,X,Y).
+safePath(X,Y,A,B) :-
+	adj(X,Y,C,D),
+	experimental()
+	safePath(C,D,A,B).
+
+
+
+% x,y is current, c,d is target
+adj(X,Y,C,D) :-
+	(pos(X,C) , Y == D , experimental(_,_,F),turnUntil(F,rwest),fakeMove,assertz(explore(moveforward))); % go left(west)
+	(pos(Y,D) , X == C , experimental(_,_,F),turnUntil(F,rsouth),fakeMove,assertz(explore(moveforward))); % go down(south)
+	(neg(X,C) , Y == D , experimental(_,_,F),turnUntil(F,reast),fakeMove,assertz(explore(moveforward))); % go right(east)
+	(neg(Y,D) , X == C , experimental(_,_,F),turnUntil(F,rnorth),fakeMove,assertz(explore(moveforward))); % go up (north)
+	
+	
+turnUntil(D,D).
+turnUntil(D,T):-
+	D \== T,
+	fakeTurn,
+	experimental(_,_,N),
+	turnUntil(N,T).
+
+
+fakeTurn :-
+	experimental(X,Y,D),
+	(
+		(D == rnorth , retractAll(experimental(_,_,_)), assertz(experimental(X,Y,reast)));
+		(D == reast , retractAll(experimental(_,_,_)), assertz(experimental(X,Y,rsouth)));
+		(D == rsouth , retractAll(experimental(_,_,_)), assertz(experimental(X,Y,rwest)));
+		(D == rwest , retractAll(experimental(_,_,_)), assertz(experimental(X,Y,rnorth)));
+	).
+
+fakeMove :- 
+	experimental(X,Y,D),
+	(
+		(D == rnorth , retractAll(experimental(_,_,_)), NewY is Y+1, assertz(experimental(X,NewY,D)));
+		(D == reast , retractAll(experimental(_,_,_)), NewX is X+1, assertz(experimental(NewX,Y,D)));
+		(D == rsouth , retractAll(experimental(_,_,_)), NewY is Y-1, assertz(experimental(X,NewY,D)));
+		(D == rwest , retractAll(experimental(_,_,_)), NewX is X-1, assertz(experimental(NewX,Y,D)));
+	).
+		*/
+
+/*
+pos(X,Y) :-
+	N is X - Y,
+	N == 1.
+
+neg(X,Y) :-
+	N is Y - X,
+	N == 1.
+*/
+/*
+handleSafeCell :-
+	current(X,Y,D),
+	safe(X,Y,D),
+	assertz(explore(moveforward)).
+*/
 
 
 
