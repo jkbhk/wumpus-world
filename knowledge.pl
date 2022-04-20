@@ -571,7 +571,7 @@ explore(L):-
 	(
 		( glitter(X,Y), L = [pickup] );
 		( stepsForSafeCell(X,Y,D,L) );
-	        (  stepsForNoSafeChoice(X,Y,L) );
+	        %(  stepsForNoSafeChoice(X,Y,L) );
 	       ( recursiveBackHome(X,Y,D,L))
 
 	).

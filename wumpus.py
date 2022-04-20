@@ -286,10 +286,18 @@ def move():
         currentSenses[0] = "on"  
     else:
         cells[prevCell][4] = prevNPC
+        if prevNPC != "W" and prevNPC != "O":
+            cells[prevCell][3] = " "
+            cells[prevCell][5] = " "
+
         prevNPC = ""+cells[currentCell][4]
         cells[currentCell][4] = getPointer(directions[orientation])
+        surroundAgentSymbol()
         sense()
         
+def surroundAgentSymbol():
+    cells[currentCell][3] = '-'
+    cells[currentCell][5] = '-'
 
 def turn(x):
     global orientation
@@ -469,6 +477,8 @@ def spawnConfundus():
         return spawnConfundus()
 
     cells[x][4] = 'O'
+    cells[x][3] = '-'
+    cells[x][5] = '-'
 
     if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != "#"):
         cells[x+1][2] = 'T'
@@ -488,6 +498,8 @@ def spawnWumpus():
         return spawnWumpus()
 
     cells[x][4] = 'W'
+    cells[x][3] = '-'
+    cells[x][5] = '-'
 
     if(x+1 >= 0 and x+1 < GRID_X*GRID_Y and cells[x+1][1] != '#'):
         cells[x+1][1] = '='
@@ -510,6 +522,7 @@ def spawnAgent():
     else:
         cells[x][4] = getPointer(directions[orientation])
         currentCell = x
+        surroundAgentSymbol()
 
 def setWalls():
     for n in range(0,GRID_X):
