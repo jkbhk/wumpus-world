@@ -2,7 +2,7 @@ from math import floor
 import random
 from pyswip import Prolog
 prolog = Prolog()
-prolog.consult("knowledge.pl")
+prolog.consult("Agent.pl")
 print(bool(list(prolog.query("reborn"))))
 
 # coordinate translation
@@ -399,7 +399,7 @@ def handleInput(input):
             if len(temp) > 0:
                 actions = temp[0].get('L')
                 for a in actions:
-                    print("agent smith: ", a)
+                    print("Agent: ", a)
                     handleAction(a)
         else:
             print("no available safe actions.")
@@ -410,20 +410,20 @@ def handleInput(input):
 
     if input == "3":
         move()
-        print(bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5]))))
 
     if input == "4":
         turn(-1)
-        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        (bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "5":
         turn(1)
-        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        (bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "6":
         if bool(list(prolog.query("hasarrow"))) :
             shoot()
-            print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+            (bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
     if input == "t":
         print(bool(list(prolog.query("unexplored(0,1)"))))
@@ -438,17 +438,17 @@ def handleAction(a):
         sense()
     elif a == "moveforward":
         move()
-        print(bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        (bool(list(prolog.query("move(moveforward,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
     elif a == "turnleft":
         turn(-1)
-        print(bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        (bool(list(prolog.query("move(turnleft,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
     elif a == "turnright":
         turn(1)
-        print(bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+        (bool(list(prolog.query("move(turnright,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
     elif a == "shoot":
         if bool(list(prolog.query("hasarrow"))) :
             shoot()
-            print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
+            (bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
 
 
