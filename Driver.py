@@ -396,10 +396,11 @@ def handleInput(input):
     if input == "1":
         if bool(list(prolog.query("explore(L)"))) is True:
             temp = list(prolog.query("explore(L)"))
-            actions = temp[0].get('L')
-            for a in actions:
-                print("agent smith: ", a)
-                handleAction(a)
+            if len(temp) > 0:
+                actions = temp[0].get('L')
+                for a in actions:
+                    print("agent smith: ", a)
+                    handleAction(a)
         else:
             print("no available safe actions.")
             gameOver = True
@@ -424,6 +425,9 @@ def handleInput(input):
             shoot()
             print(bool(list(prolog.query("move(shoot,[{},{},{},{},{},{}])".format(currentSenses[0],currentSenses[1],currentSenses[2],currentSenses[3],currentSenses[4],currentSenses[5])))))
 
+    if input == "t":
+        print(bool(list(prolog.query("unexplored(0,1)"))))
+        print(bool(list(prolog.query("unexplored(0,-1)"))))
 
     if input == "end":
         gameOver = True
