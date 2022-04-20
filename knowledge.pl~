@@ -20,7 +20,9 @@
        locationFound/1,
        uncollectedCoins/1,
        tried/3,
-       safeToBacktrack/2
+       safeToBacktrack/2,
+       goHome/2,
+       recursiveBackHome/4
 
 ]).
 
@@ -37,7 +39,10 @@ reborn :-
 	retractall(visited(_,_)),assertz(visited(0,0)),
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
 	retractall(safe(_,_)), assertz(safe(0,0)),
-	retractall(locationFound(_)).
+	retractall(locationFound(_)),
+	retractall(safeToBacktrack(_,_)),
+	retractall(hascoin(_)),
+	retractall(goHome(_,_)).
 
 
 reposition([_,_,_,_,_,_]) :-
@@ -47,7 +52,8 @@ reposition([_,_,_,_,_,_]) :-
 	retractall(visited(_,_)), assertz(visited(0,0)),
 	retractall(safe(_,_)), assertz(safe(0,0)),
 	retractall(wall(_,_)),
-	retractall(current(_,_,_)),assertz(current(0,0,rnorth)).
+	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
+	retractall(goHome(_,_)),retractall(safeToBacktrack(_,_)).
         % reset relative positive (0,0), relative orientation is north
 
 
@@ -69,36 +75,40 @@ clearData(X,Y) :-
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBacktrack(X,Y)),
 	D == rnorth,
+	assertz(safeToBacktrack(X,Y)),
         NewY is Y + 1,
+	(  ( \+visited(X,NewY) ,assertz(goHome(X,Y)));true ),
 	retractall(current(_,_,_)),
 	assertz(current(X,NewY,D)),
 	assertz(visited(X,NewY)).
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBacktrack(X,Y)),
 	D == rsouth,
+	assertz(safeToBacktrack(X,Y)),
 	NewY is Y - 1,
+	(   (\+visited(X,NewY) ,assertz(goHome(X,Y)));true ),
 	retractall(current(_,_,_)),
 	assertz(current(X,NewY,D)),
 	assertz(visited(X,NewY)).
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBacktrack(X,Y)),
 	D == reast,
+	assertz(safeToBacktrack(X,Y)),
 	NewX is X + 1,
+	(  ( \+visited(NewX,Y) ,assertz(goHome(X,Y)));true ),
 	retractall(current(_,_,_)),
 	assertz(current(NewX,Y,D)),
 	assertz(visited(NewX,Y)).
 
 advance :-
 	current(X,Y,D),
-	assertz(safeToBacktrack(X,Y)),
 	D == rwest,
+	assertz(safeToBacktrack(X,Y)),
 	NewX is X - 1,
+	(  ( \+visited(NewX,Y) ,assertz(goHome(X,Y)));true ),
 	retractall(current(_,_,_)),
 	assertz(current(NewX,Y,D)),
 	assertz(visited(NewX,Y)).
@@ -324,12 +334,107 @@ findWumpus :-
 	assertz(locationFound(wumpus)).
 
 
-
-
-
 % case 1: no inferred safe edge
 % case 2: got iferred sage edge
 % case 3: no unvisited safe edge
+%
+
+%recursively go home if goHome(X,Y) is in the knowledge base
+%once i move back to that cell, retract from knowledge base
+%recursiveBackHome(_,_,_) :-
+%goHome(0,0).
+
+
+
+recursiveBackHome(_,_,_,_):-
+	goHome(0,0).
+
+recursiveBackHome(X,Y,D,L) :-
+	N is Y + 1, %top
+	E is X + 1, %right
+	S is Y - 1, %bottom
+	W is X - 1, %left
+       (
+	( %check top
+	  goHome(X,N),
+	   (		 ( D == rnorth, L = [moveforward], retractall(goHome(X,N)) );
+			 ( D == rsouth, L = [turnleft,turnleft,moveforward], retractall(goHome(X,N)));
+			 ( D == reast, L = [turnleft,moveforward] , retractall(goHome(X,N)) );
+			 ( D == rwest, L = [turnright,moveforward], retractall(goHome(X,N))  )
+	   )
+	);
+
+	( %check right
+	  goHome(E,Y),
+	   (                ( D == rnorth, L = [turnright,moveforward], retractall(goHome(E,Y)) );
+	               ( D == rsouth, L = [turnleft,moveforward], retractall(goHome(E,Y)));
+	               ( D == reast, L = [moveforward] , retractall(goHome(E,Y)) );
+	               ( D == rwest, L = [turnright,turnright,moveforward], retractall(goHome(E,Y))  )
+	   )
+	);
+
+	( %check bottom
+	  goHome(X,S),
+	   (         ( D == rnorth, L = [turnright,turnright,moveforward], retractall(goHome(X,S)) );
+	           ( D == rsouth, L = [moveforward], retractall(goHome(X,S)));
+	           ( D == reast, L = [turnright,moveforward] , retractall(goHome(X,S)) );
+	              ( D == rwest, L = [turnleft,moveforward], retractall(goHome(X,S))  )
+	    )
+	);
+
+	( %check left
+	  goHome(W,Y),
+	   (
+	             ( D == rnorth, L = [turnleft,moveforward], retractall(goHome(W,Y)) );
+	             ( D == rsouth, L = [turnright,moveforward], retractall(goHome(W,Y)));
+	            ( D == reast, L = [turnright,turnright,moveforward] , retractall(goHome(W,Y)) );
+	              ( D == rwest, L = [moveforward], retractall(goHome(W,Y))  )
+	  )
+	)
+       ).
+
+%no choice enter portal
+stepsForNoSafeChoice(X,Y,L) :-
+	N is Y + 1, %top
+	S is Y - 1, %bottom
+	E is X + 1, %right
+	W is X - 1, %left
+	(
+		%% Dont walk into wumpus (but no choice enter portal)
+
+		(
+			wumpus(X,N),
+			(
+				(L = [turnleft,turnleft,moveforward])
+
+			)
+		);
+		(
+			wumpus(X,S),
+			(
+			       (L = [turnleft,turnleft,moveforward])
+
+			)
+		);
+		(
+			wumpus(E,Y),
+			(
+
+			      (L = [turnleft,turnleft,moveforward])
+
+			)
+		);
+		(
+			wumpus(W,Y),
+			(
+
+				(L = [turnleft,turnleft,moveforward])
+
+			 )
+		)
+
+	).
+
 
 
 stepsForSafeCell(X,Y,D,L):-
@@ -338,7 +443,7 @@ stepsForSafeCell(X,Y,D,L):-
 	E is X + 1, %right
 	W is X - 1, %left
 	(
-		%% Backtrack
+		%% Dont walk into portal/wumpus
 
 				(
 			(wumpus(X,N);confundus(X,N)),
@@ -372,7 +477,7 @@ stepsForSafeCell(X,Y,D,L):-
 		);
 
 
-
+			 %%explore new places if no wumpus and no portal
 
 
 
@@ -411,8 +516,57 @@ stepsForSafeCell(X,Y,D,L):-
 				(D == rsouth, L = [turnright, moveforward]);
 				(D == rwest, L = [moveforward])
 			)
-		)
+		);
 
+		%% backtrack to safe places when no more other moves to try
+
+			 (
+			(safeToBacktrack(X,N)),
+			(
+				(D == rnorth, L = [tmoveforward]);
+				(D == reast, L = [turnleft, moveforward]);
+				(D == rsouth, L = [turnright,turnright, moveforward]);
+				(D == rwest, L = [turnright,moveforward])
+
+			)
+		);
+		(
+			(safeToBacktrack(X,S)),
+			(
+				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				(D == reast, L = [turnright, moveforward]);
+				(D == rsouth, L = [moveforward]);
+				(D == rwest, L = [turnleft,moveforward])
+
+
+			)
+		);
+		(
+			(safeToBacktrack(E,Y)),
+			(
+
+			      (D == rnorth, L = [turnright,moveforward]);
+				(D == reast, L = [moveforward]);
+				(D == rsouth, L = [turnleft, moveforward]);
+				(D == rwest, L = [turnleft,turnleft,moveforward])
+
+
+
+			)
+		);
+		(
+			(safeToBacktrack(W,Y)),
+			(
+
+			      (D == rnorth, L = [turnleft,moveforward]);
+				(D == reast, L = [turnright,turnright, moveforward]);
+				(D == rsouth, L = [turnright, moveforward]);
+				(D == rwest, L = [moveforward])
+
+
+
+			 )
+		)
 	).
 
 
@@ -420,9 +574,9 @@ explore(L):-
 	current(X,Y,D),
 	(
 		( glitter(X,Y), L = [pickup] );
-		%( stench(X,Y), stepsForStenchCell(X,Y,D,L) );
-		%( tingle(X,Y), stepsForTingleCell(X,Y,D,L) );
-		( stepsForSafeCell(X,Y,D,L) )
+		%( stepsForSafeCell(X,Y,D,L) );
+	        %(  stepsForNoSafeChoice(X,Y,L) );
+	       ( recursiveBackHome(X,Y,D,L))
 
 	).
 
