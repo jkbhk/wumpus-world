@@ -21,7 +21,8 @@
        uncollectedCoins/1,
        tried/3,
        safeToBacktrack/2,
-	   gohome/2
+       goHome/2,
+       recursiveBackHome/4
 
 ]).
 
@@ -39,7 +40,9 @@ reborn :-
 	retractall(current(_,_,_)),assertz(current(0,0,rnorth)),
 	retractall(safe(_,_)), assertz(safe(0,0)),
 	retractall(locationFound(_)),
-	retractall(safeToBacktrack(_,_)).
+	retractall(safeToBacktrack(_,_)),
+	retractall(hascoin(_)),
+	retractall(goHome(_,_)).
 
 
 reposition([_,_,_,_,_,_]) :-
