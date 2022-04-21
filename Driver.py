@@ -568,6 +568,7 @@ def setupWorld():
     resetAgent()
     resetSenses()
     sense()
+    currentSenses[0] = "on"
 
 if __name__ == '__main__':
     #test2()
