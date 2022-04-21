@@ -628,7 +628,7 @@ stepsForSafeCell(X,Y,D,L):-
 			(
 				(D == rnorth, L = [moveforward]);
 				(D == reast, L = [turnleft, moveforward]);
-				(D == rsouth, L = [turnright,turnright, moveforward]);
+				%(D == rsouth, L = [turnright,turnright, moveforward]);
 				(D == rwest, L = [turnright,moveforward])
 
 			)
@@ -636,7 +636,7 @@ stepsForSafeCell(X,Y,D,L):-
 		(
 			(safeToBacktrack(X,S),\+surrounded(X,S)),
 			(
-				(D == rnorth, L = [turnleft,turnleft,moveforward]);
+				%(D == rnorth, L = [turnleft,turnleft,moveforward]);
 				(D == reast, L = [turnright, moveforward]);
 				(D == rsouth, L = [moveforward]);
 				(D == rwest, L = [turnleft,moveforward])
@@ -650,11 +650,8 @@ stepsForSafeCell(X,Y,D,L):-
 
 			      (D == rnorth, L = [turnright,moveforward]);
 				(D == reast, L = [moveforward]);
-				(D == rsouth, L = [turnleft, moveforward]);
-				(D == rwest, L = [turnleft,turnleft,moveforward])
-
-
-
+				(D == rsouth, L = [turnleft, moveforward])
+				%(D == rwest, L = [turnleft,turnleft,moveforward])
 			)
 		);
 		(
@@ -662,12 +659,9 @@ stepsForSafeCell(X,Y,D,L):-
 			(
 
 			    (D == rnorth, L = [turnleft,moveforward]);
-				(D == reast, L = [turnright,turnright, moveforward]);
+				%(D == reast, L = [turnright,turnright, moveforward]);
 				(D == rsouth, L = [turnright, moveforward]);
 				(D == rwest, L = [moveforward])
-
-
-
 			 )
 		)
 	).
